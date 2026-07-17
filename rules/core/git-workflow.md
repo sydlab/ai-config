@@ -5,7 +5,8 @@ alwaysApply: true
 
 # Git commit protocol
 
-Only create commits when requested by the user. If unclear, ask first.
+Commit when the user asks, or when the task clearly includes committing (e.g.
+"implement and commit", "fix and push"). If unclear, ask before committing.
 
 ## Git safety protocol
 
@@ -26,6 +27,7 @@ Only create commits when requested by the user. If unclear, ask first.
 2. Analyze changes; draft a commit message per `git-commit-format.md`
 3. Do not commit files likely containing secrets
 4. Sequential: add files, commit, verify with `git status`
-5. Do NOT push unless explicitly asked
+5. Push only when the user asks or the task clearly includes push. If unclear,
+   ask before pushing
 
 Pass commit messages via HEREDOC for correct formatting.
