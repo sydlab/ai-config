@@ -1,0 +1,9 @@
+# Never commit machine-specific local overlays
+rules/machines/*.local.md
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+
+*.log
