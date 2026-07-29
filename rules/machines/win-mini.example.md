@@ -1,21 +1,7 @@
-# win-mini.example.md
+# Optional machine notes (Windows mini PC)
+# Copy to win-mini.local.md and fill paths. Not loaded by CLI unless merged into AGENTS.md.
 
-Template only — **do not import into Cursor**.
-
-Create `win-mini.local.md` (gitignored) from the block below, then import that file.
-
-```markdown
----
-description: Machine-specific settings (Windows mini PC)
-alwaysApply: true
----
-
-# Windows mini PC
-
-- OS: Windows 11
-- Shell: PowerShell
-- Repos root: `~/Tech/repos` (`C:\Users\<you>\Tech\repos`)
-- Dotfiles repo: `C:\Users\<you>\Tech\repos\cursor-dotfiles`
-```
-
-Replace `<you>` with your Windows username.
+OS: Windows 11
+Shell: PowerShell
+Repos root: C:\Users\<you>\Tech\repos
+Dotfiles: C:\Users\<you>\Tech\repos\cursor-dotfiles

@@ -1,40 +1,59 @@
 # cursor-dotfiles
 
-Version-controlled Cursor User Rules for **Mac laptop** and **Windows mini PC**.
+Git storage for **personal global agent standards**. Aimed at Cursor CLI (`agent`), which reads `AGENTS.md` in the project root — there is no separate CLI global-rules file.
 
-Git is the source of truth. Import rule files into **Cursor → Customize → Rules** on each machine.
+## What this buys you
 
-## Rules (12 total)
+- Same standards on every repo under `~/Tech/repos` after install (Mac + Win)
+- Less re-prompting (git, security, code taste, decision authority)
+- One place to edit prefs, then re-link
 
-| Layer | Path | Count | Import? |
-|-------|------|-------|---------|
-| Core | `rules/core/*.md` | 9 | Yes |
-| Cursor | `rules/cursor/*.md` | 2 | Yes |
-| Machine | `rules/machines/<machine>.local.md` | 1 | Yes |
-
-**Do not import:**
-
-- `AGENTS.md` — duplicates `rules/core/`; CLI only
-- `rules/machines/*.example.md` — setup templates, not User Rules
-
-## Setup
-
-See [EXPORT.md](EXPORT.md) for clone, import, and sync steps.
-
-Machine overlay: create `*.local.md` from `rules/machines/*.example.md` (gitignored), then import the `.local.md` file only.
-
-## Structure
+## Layout
 
 ```
-cursor-dotfiles/
-  rules/core/           User Rules — portable (9)
-  rules/cursor/         User Rules — Cursor-only (2)
-  rules/machines/       Setup templates (*.local.md gitignored)
-  AGENTS.md             CLI digest only
-  EXPORT.md             Cursor setup guide
-  PLAN.md               Preservation plan
+AGENTS.md                 # what CLI loads (canonical runtime text)
+rules/                    # modular source (edit here, keep AGENTS.md in sync)
+rules/machines/           # optional OS/path overlays (*.local.md gitignored)
+scripts/install.ps1       # Windows: link AGENTS.md into each repo
+scripts/install.sh        # Mac/Linux: same
+README.md
 ```
 
-## Branch policy
+## Not tracked
 
-Never push directly to `main`. Feature branches + PRs only.
+cli-config, built-in skills, chat history, plugins, per-project app rules, `*.local.md`
+
+## Setup (each machine)
+
+```bash
+git clone https://github.com/sydlab/cursor-dotfiles.git ~/Tech/repos/cursor-dotfiles
+cd ~/Tech/repos/cursor-dotfiles
+```
+
+Windows (PowerShell, Developer Mode or admin may be needed for symlinks):
+
+```powershell
+.\scripts\install.ps1
+```
+
+Mac/Linux:
+
+```bash
+./scripts/install.sh
+```
+
+Install places `AGENTS.md` in each git repo under `~/Tech/repos` (symlink when allowed; **copy** fallback on Windows without Developer Mode) and adds `AGENTS.md` to that repo’s **local** `.git/info/exclude` so it stays personal (not committed). Re-run install after editing if your machine used COPY mode.
+
+Optional: copy `rules/machines/*.example.md` → `*.local.md` for your own notes (not loaded by CLI unless you merge into `AGENTS.md`).
+
+## Sync after editing standards
+
+1. Edit `rules/*.md` and update `AGENTS.md` to match
+2. Commit / pull on the other machine
+3. Re-run `install.ps1` / `install.sh` (safe to re-run; refreshes links)
+
+New repo under `~/Tech/repos` → re-run install once.
+
+## IDE note
+
+Cursor **User Rules** (Customize → Rules) are separate from CLI `AGENTS.md`. Optional: paste the same standards there for IDE Agent. This repo’s primary path is CLI install.

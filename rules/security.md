@@ -1,8 +1,3 @@
----
-description: Security - secrets, credentials, redaction
-alwaysApply: true
----
-
 # Security
 
 - Never commit secrets: `.env`, credentials files, API keys, tokens, private keys

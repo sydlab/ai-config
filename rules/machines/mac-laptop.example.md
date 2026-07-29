@@ -1,19 +1,7 @@
-# mac-laptop.example.md
+# Optional machine notes (Mac laptop)
+# Copy to mac-laptop.local.md and fill paths. Not loaded by CLI unless merged into AGENTS.md.
 
-Template only — **do not import into Cursor**.
-
-Copy content below into `mac-laptop.local.md` (gitignored), then import that file.
-
-```markdown
----
-description: Machine-specific settings (Mac laptop)
-alwaysApply: true
----
-
-# Mac laptop
-
-- OS: macOS
-- Shell: zsh
-- Repos root: `~/Tech/repos`
-- Dotfiles repo: `~/Tech/repos/cursor-dotfiles`
-```
+OS: macOS
+Shell: zsh
+Repos root: ~/Tech/repos
+Dotfiles: ~/Tech/repos/cursor-dotfiles

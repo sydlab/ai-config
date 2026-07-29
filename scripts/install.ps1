@@ -1,0 +1,86 @@
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+  Place this repo's AGENTS.md into every git repo under ~/Tech/repos.
+  Prefers symlink; falls back to copy if Windows blocks symlinks.
+  Adds AGENTS.md to each repo's local .git/info/exclude (not committed).
+#>
+$ErrorActionPreference = "Stop"
+
+$Dotfiles = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$AgentsSrc = Join-Path $Dotfiles "AGENTS.md"
+if (-not (Test-Path $AgentsSrc)) {
+  throw "Missing AGENTS.md at $AgentsSrc"
+}
+$AgentsSrcFull = (Resolve-Path -LiteralPath $AgentsSrc).Path
+
+$ReposRoot = Join-Path $HOME "Tech\repos"
+if (-not (Test-Path $ReposRoot)) {
+  throw "Repos root not found: $ReposRoot"
+}
+
+$linked = 0
+$skipped = 0
+$failed = 0
+
+function Ensure-Exclude {
+  param([string]$Repo)
+  $exclude = Join-Path $Repo ".git\info\exclude"
+  $excludeDir = Split-Path $exclude -Parent
+  if (-not (Test-Path $excludeDir)) {
+    New-Item -ItemType Directory -Path $excludeDir -Force | Out-Null
+  }
+  $existing = @()
+  if (Test-Path $exclude) {
+    $existing = Get-Content -LiteralPath $exclude -ErrorAction SilentlyContinue
+  }
+  if ($existing -notcontains "AGENTS.md") {
+    Add-Content -LiteralPath $exclude -Value "AGENTS.md"
+  }
+}
+
+Get-ChildItem -Path $ReposRoot -Directory | ForEach-Object {
+  $repo = $_.FullName
+  if (-not (Test-Path (Join-Path $repo ".git"))) {
+    $script:skipped++
+    return
+  }
+
+  $dest = Join-Path $repo "AGENTS.md"
+  try {
+    # Source repo: AGENTS.md is the real file
+    if ($repo -eq $Dotfiles) {
+      Ensure-Exclude $repo
+      Write-Host "OK  $repo (source)"
+      $script:linked++
+      return
+    }
+
+    $mode = "link"
+    try {
+      if (Test-Path $dest) {
+        Remove-Item -LiteralPath $dest -Force
+      }
+      New-Item -ItemType SymbolicLink -Path $dest -Target $AgentsSrcFull -ErrorAction Stop | Out-Null
+    } catch {
+      $mode = "copy"
+      Copy-Item -LiteralPath $AgentsSrcFull -Destination $dest -Force
+    }
+
+    Ensure-Exclude $repo
+    if ($mode -eq "link") {
+      Write-Host "OK  $repo"
+    } else {
+      Write-Host "COPY $repo"
+    }
+    $script:linked++
+  } catch {
+    Write-Host ("FAIL {0} - {1}" -f $repo, $_.Exception.Message)
+    $script:failed++
+  }
+}
+
+Write-Host ""
+Write-Host ("Done: {0}  Skipped: {1}  Failed: {2}" -f $linked, $skipped, $failed)
+Write-Host "Note: COPY mode needs re-run after AGENTS.md changes. Symlink updates automatically."
+if ($failed -gt 0) { exit 1 }
