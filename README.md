@@ -6,22 +6,18 @@ Git storage for **personal global agent standards**. Aimed at Cursor CLI (`agent
 
 - Same standards on every repo under `~/Tech/repos` after install (Mac + Win)
 - Less re-prompting (git, security, code taste, decision authority)
-- One place to edit prefs, then re-link
+- One place to edit prefs (`rules/`), then rebuild + re-link
 
-## Layout
+## Source of truth
+
+**Edit `rules/*.md` only.** `AGENTS.md` is **generated** — do not hand-edit it.
 
 ```
-AGENTS.md                 # what CLI loads (canonical runtime text)
-rules/                    # modular source (edit here, keep AGENTS.md in sync)
-rules/machines/           # optional OS/path overlays (*.local.md gitignored)
-scripts/install.ps1       # Windows: link AGENTS.md into each repo
-scripts/install.sh        # Mac/Linux: same
-README.md
+rules/*.md                # edit these
+scripts/build-agents.*    # cats rules → AGENTS.md
+scripts/install.*         # build, then link/copy into ~/Tech/repos
+AGENTS.md                 # generated runtime file (committed for clones)
 ```
-
-## Not tracked
-
-cli-config, built-in skills, chat history, plugins, per-project app rules, `*.local.md`
 
 ## Setup (each machine)
 
@@ -30,7 +26,7 @@ git clone https://github.com/sydlab/cursor-dotfiles.git ~/Tech/repos/cursor-dotf
 cd ~/Tech/repos/cursor-dotfiles
 ```
 
-Windows (PowerShell, Developer Mode or admin may be needed for symlinks):
+Windows (PowerShell; Developer Mode recommended for symlinks):
 
 ```powershell
 .\scripts\install.ps1
@@ -39,21 +35,24 @@ Windows (PowerShell, Developer Mode or admin may be needed for symlinks):
 Mac/Linux:
 
 ```bash
+chmod +x scripts/*.sh
 ./scripts/install.sh
 ```
 
-Install places `AGENTS.md` in each git repo under `~/Tech/repos` (symlink when allowed; **copy** fallback on Windows without Developer Mode) and adds `AGENTS.md` to that repo’s **local** `.git/info/exclude` so it stays personal (not committed). Re-run install after editing if your machine used COPY mode.
-
-Optional: copy `rules/machines/*.example.md` → `*.local.md` for your own notes (not loaded by CLI unless you merge into `AGENTS.md`).
+Install rebuilds `AGENTS.md` from `rules/`, places it in each git repo under `~/Tech/repos` (symlink via `mklink` when possible; copy fallback), and adds `AGENTS.md` to that repo’s **local** `.git/info/exclude` so it stays personal.
 
 ## Sync after editing standards
 
-1. Edit `rules/*.md` and update `AGENTS.md` to match
+1. Edit `rules/*.md` only
 2. Commit / pull on the other machine
-3. Re-run `install.ps1` / `install.sh` (safe to re-run; refreshes links)
+3. Re-run `install.ps1` / `install.sh` (rebuilds `AGENTS.md`, refreshes links)
 
 New repo under `~/Tech/repos` → re-run install once.
 
+## Not tracked
+
+cli-config, built-in skills, chat history, plugins, per-project app rules, `rules/machines/*.local.md`
+
 ## IDE note
 
-Cursor **User Rules** (Customize → Rules) are separate from CLI `AGENTS.md`. Optional: paste the same standards there for IDE Agent. This repo’s primary path is CLI install.
+Cursor **User Rules** (Customize → Rules) are separate from CLI `AGENTS.md`. Optional for IDE Agent; this repo’s primary path is CLI install.

@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
-# Symlink this repo's AGENTS.md into every git repo under ~/Tech/repos.
+# Build AGENTS.md from rules/, then symlink into every git repo under ~/Tech/repos.
 # Adds AGENTS.md to each repo's local .git/info/exclude (not committed).
 set -euo pipefail
 
-DOTFILES="$(cd "$(dirname "$0")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
 AGENTS_SRC="$DOTFILES/AGENTS.md"
 REPOS_ROOT="${HOME}/Tech/repos"
 
-if [[ ! -f "$AGENTS_SRC" ]]; then
-  echo "Missing AGENTS.md at $AGENTS_SRC" >&2
-  exit 1
-fi
+"$SCRIPT_DIR/build-agents.sh"
+
 if [[ ! -d "$REPOS_ROOT" ]]; then
   echo "Repos root not found: $REPOS_ROOT" >&2
   exit 1
@@ -18,21 +17,13 @@ fi
 
 linked=0
 skipped=0
-failed=0
 
 for repo in "$REPOS_ROOT"/*; do
   [[ -d "$repo" ]] || continue
   [[ -e "$repo/.git" ]] || { skipped=$((skipped + 1)); continue; }
 
   dest="$repo/AGENTS.md"
-  # Source repo already has the real AGENTS.md
-  if [[ "$repo" == "$DOTFILES" ]]; then
-    :
-  elif [[ -L "$dest" || ! -e "$dest" ]]; then
-    rm -f "$dest"
-    ln -s "$AGENTS_SRC" "$dest"
-  else
-    # Replace unmanaged file with symlink (personal global install)
+  if [[ "$repo" != "$DOTFILES" ]]; then
     rm -f "$dest"
     ln -s "$AGENTS_SRC" "$dest"
   fi
@@ -50,4 +41,5 @@ for repo in "$REPOS_ROOT"/*; do
 done
 
 echo ""
-echo "Linked/refreshed: $linked  Skipped: $skipped  Failed: $failed"
+echo "Linked/refreshed: $linked  Skipped: $skipped"
+echo "Edit rules/*.md only. Re-run install after changes."

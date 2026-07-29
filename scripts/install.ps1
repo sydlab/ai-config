@@ -1,17 +1,21 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Place this repo's AGENTS.md into every git repo under ~/Tech/repos.
-  Prefers symlink (via cmd mklink; works with Developer Mode); falls back to copy.
+  Build AGENTS.md from rules/, then link/copy it into every git repo under ~/Tech/repos.
+  Prefers symlink (cmd mklink); falls back to copy.
   Adds AGENTS.md to each repo's local .git/info/exclude (not committed).
 #>
 $ErrorActionPreference = "Stop"
 
-$Dotfiles = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$AgentsSrc = Join-Path $Dotfiles "AGENTS.md"
-if (-not (Test-Path $AgentsSrc)) {
-  throw "Missing AGENTS.md at $AgentsSrc"
+$ScriptDir = $PSScriptRoot
+$Dotfiles = (Resolve-Path (Join-Path $ScriptDir "..")).Path
+
+& (Join-Path $ScriptDir "build-agents.ps1")
+if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) {
+  throw "build-agents.ps1 failed"
 }
+
+$AgentsSrc = Join-Path $Dotfiles "AGENTS.md"
 $AgentsSrcFull = (Resolve-Path -LiteralPath $AgentsSrc).Path
 
 $ReposRoot = Join-Path $HOME "Tech\repos"
@@ -47,7 +51,6 @@ function New-AgentsLink {
   if (Test-Path -LiteralPath $Dest) {
     Remove-Item -LiteralPath $Dest -Force
   }
-  # cmd mklink works with Developer Mode; PowerShell New-Item often still demands admin
   $p = Start-Process -FilePath "cmd.exe" -ArgumentList @("/c", "mklink", "`"$Dest`"", "`"$Target`"") -Wait -PassThru -NoNewWindow
   if ($p.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $Dest)) {
     throw "mklink failed (exit $($p.ExitCode))"
@@ -100,5 +103,5 @@ Get-ChildItem -Path $ReposRoot -Directory | ForEach-Object {
 
 Write-Host ""
 Write-Host ("Done: {0}  Skipped: {1}  Failed: {2}" -f $linked, $skipped, $failed)
-Write-Host "Note: COPY mode needs re-run after AGENTS.md changes. Symlink updates automatically."
+Write-Host "Edit rules/*.md only. Re-run install after changes (symlinks pick up rebuilt AGENTS.md)."
 if ($failed -gt 0) { exit 1 }
