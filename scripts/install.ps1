@@ -2,7 +2,7 @@
 <#
 .SYNOPSIS
   Place this repo's AGENTS.md into every git repo under ~/Tech/repos.
-  Prefers symlink; falls back to copy if Windows blocks symlinks.
+  Prefers symlink (via cmd mklink; works with Developer Mode); falls back to copy.
   Adds AGENTS.md to each repo's local .git/info/exclude (not committed).
 #>
 $ErrorActionPreference = "Stop"
@@ -39,6 +39,25 @@ function Ensure-Exclude {
   }
 }
 
+function New-AgentsLink {
+  param(
+    [string]$Dest,
+    [string]$Target
+  )
+  if (Test-Path -LiteralPath $Dest) {
+    Remove-Item -LiteralPath $Dest -Force
+  }
+  # cmd mklink works with Developer Mode; PowerShell New-Item often still demands admin
+  $p = Start-Process -FilePath "cmd.exe" -ArgumentList @("/c", "mklink", "`"$Dest`"", "`"$Target`"") -Wait -PassThru -NoNewWindow
+  if ($p.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $Dest)) {
+    throw "mklink failed (exit $($p.ExitCode))"
+  }
+  $item = Get-Item -LiteralPath $Dest -Force
+  if ($item.LinkType -ne "SymbolicLink") {
+    throw "created path is not a SymbolicLink"
+  }
+}
+
 Get-ChildItem -Path $ReposRoot -Directory | ForEach-Object {
   $repo = $_.FullName
   if (-not (Test-Path (Join-Path $repo ".git"))) {
@@ -48,7 +67,6 @@ Get-ChildItem -Path $ReposRoot -Directory | ForEach-Object {
 
   $dest = Join-Path $repo "AGENTS.md"
   try {
-    # Source repo: AGENTS.md is the real file
     if ($repo -eq $Dotfiles) {
       Ensure-Exclude $repo
       Write-Host "OK  $repo (source)"
@@ -58,12 +76,12 @@ Get-ChildItem -Path $ReposRoot -Directory | ForEach-Object {
 
     $mode = "link"
     try {
-      if (Test-Path $dest) {
-        Remove-Item -LiteralPath $dest -Force
-      }
-      New-Item -ItemType SymbolicLink -Path $dest -Target $AgentsSrcFull -ErrorAction Stop | Out-Null
+      New-AgentsLink -Dest $dest -Target $AgentsSrcFull
     } catch {
       $mode = "copy"
+      if (Test-Path -LiteralPath $dest) {
+        Remove-Item -LiteralPath $dest -Force
+      }
       Copy-Item -LiteralPath $AgentsSrcFull -Destination $dest -Force
     }
 
