@@ -3,5 +3,6 @@
 
 OS: macOS
 Shell: zsh
-Repos root: ~/Tech/repos
+Work root: ~/Tech/repos
+CLI install root: ~/Tech (skips ~/Tech/projects)
 Dotfiles: ~/Tech/repos/cursor-dotfiles

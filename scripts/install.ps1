@@ -1,9 +1,8 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Build AGENTS.md from rules/, then link/copy it into every git repo under ~/Tech/repos.
-  Prefers symlink (cmd mklink); falls back to copy.
-  Adds AGENTS.md to each repo's local .git/info/exclude (not committed).
+  Build AGENTS.md from rules/, link/copy into git repos under ~/Tech (skip projects),
+  and write ~/.cursor/rules/00-personal-standards.mdc for IDE Agent.
 #>
 $ErrorActionPreference = "Stop"
 
@@ -18,10 +17,14 @@ if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) {
 $AgentsSrc = Join-Path $Dotfiles "AGENTS.md"
 $AgentsSrcFull = (Resolve-Path -LiteralPath $AgentsSrc).Path
 
-$ReposRoot = Join-Path $HOME "Tech\repos"
-if (-not (Test-Path $ReposRoot)) {
-  throw "Repos root not found: $ReposRoot"
+$TechRoot = Join-Path $HOME "Tech"
+if (-not (Test-Path $TechRoot)) {
+  throw "Tech root not found: $TechRoot"
 }
+
+$ProjectsRoot = [System.IO.Path]::GetFullPath((Join-Path $TechRoot "projects"))
+$CursorRulesDir = Join-Path $HOME ".cursor\rules"
+$MdcPath = Join-Path $CursorRulesDir "00-personal-standards.mdc"
 
 $linked = 0
 $skipped = 0
@@ -61,11 +64,51 @@ function New-AgentsLink {
   }
 }
 
-Get-ChildItem -Path $ReposRoot -Directory | ForEach-Object {
-  $repo = $_.FullName
-  if (-not (Test-Path (Join-Path $repo ".git"))) {
-    $script:skipped++
-    return
+function Test-UnderProjects {
+  param([string]$Path)
+  $full = [System.IO.Path]::GetFullPath($Path)
+  if (-not (Test-Path -LiteralPath $ProjectsRoot)) { return $false }
+  return $full.StartsWith($ProjectsRoot.TrimEnd('\') + '\', [System.StringComparison]::OrdinalIgnoreCase) -or
+    $full.Equals($ProjectsRoot, [System.StringComparison]::OrdinalIgnoreCase)
+}
+
+function Write-IdeRules {
+  if (-not (Test-Path $CursorRulesDir)) {
+    New-Item -ItemType Directory -Path $CursorRulesDir -Force | Out-Null
+  }
+  $raw = Get-Content -LiteralPath $AgentsSrcFull -Raw -Encoding UTF8
+  $idx = $raw.IndexOf("# Security")
+  if ($idx -lt 0) { throw "AGENTS.md missing # Security section" }
+  $body = $raw.Substring($idx).TrimEnd() + "`n"
+  $mdc = @"
+---
+description: Personal global standards (from cursor-dotfiles)
+alwaysApply: true
+---
+
+# Agent instructions
+
+$body
+"@
+  $mdc = $mdc -replace "`r`n", "`n" -replace "`r", "`n"
+  if (-not $mdc.EndsWith("`n")) { $mdc += "`n" }
+  [System.IO.File]::WriteAllText($MdcPath, $mdc, [System.Text.UTF8Encoding]::new($false))
+  Write-Host "IDE  $MdcPath"
+}
+
+Write-IdeRules
+
+$repos = @(
+  Get-ChildItem -Path $TechRoot -Directory -Recurse -Force -ErrorAction SilentlyContinue |
+    Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName ".git") } |
+    ForEach-Object { $_.FullName }
+) | Sort-Object -Unique
+
+foreach ($repo in $repos) {
+  if (Test-UnderProjects $repo) {
+    Write-Host "SKIP $repo (projects)"
+    $skipped++
+    continue
   }
 
   $dest = Join-Path $repo "AGENTS.md"
@@ -73,8 +116,8 @@ Get-ChildItem -Path $ReposRoot -Directory | ForEach-Object {
     if ($repo -eq $Dotfiles) {
       Ensure-Exclude $repo
       Write-Host "OK  $repo (source)"
-      $script:linked++
-      return
+      $linked++
+      continue
     }
 
     $mode = "link"
@@ -94,14 +137,14 @@ Get-ChildItem -Path $ReposRoot -Directory | ForEach-Object {
     } else {
       Write-Host "COPY $repo"
     }
-    $script:linked++
+    $linked++
   } catch {
     Write-Host ("FAIL {0} - {1}" -f $repo, $_.Exception.Message)
-    $script:failed++
+    $failed++
   }
 }
 
 Write-Host ""
 Write-Host ("Done: {0}  Skipped: {1}  Failed: {2}" -f $linked, $skipped, $failed)
-Write-Host "Edit rules/*.md only. Re-run install after changes (symlinks pick up rebuilt AGENTS.md)."
+Write-Host "Edit rules/*.md only. Re-run install after changes."
 if ($failed -gt 0) { exit 1 }

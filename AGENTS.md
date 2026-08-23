@@ -2,7 +2,7 @@
 
 # Agent instructions
 
-Personal global standards for Cursor CLI (and any tool that reads `AGENTS.md`).
+Personal global standards for Cursor CLI and IDE Agent.
 Edit files under `rules/`, then rebuild. Source of truth is `rules/`, not this file.
 
 # Security
@@ -16,10 +16,7 @@ Edit files under `rules/`, then rebuild. Source of truth is `rules/`, not this f
 
 # Git
 
-## When to commit / push
-
-Commit when the user asks, or when the task clearly includes committing. If unclear, ask first.
-Push when the user asks, or when the task clearly includes push. If unclear, ask first.
+Whether to commit or push is decided by Decision authority. This file is how.
 
 ## Safety
 
@@ -31,35 +28,46 @@ Push when the user asks, or when the task clearly includes push. If unclear, ask
   1. User explicitly requested amend, OR commit succeeded but pre-commit hook auto-modified files
   2. HEAD commit was created by you in this conversation
   3. Commit has NOT been pushed to remote
-- If commit FAILED or was REJECTED by a hook, NEVER amend â€” fix and create a NEW commit
+- If commit FAILED or was REJECTED by a hook, NEVER amend - fix and create a NEW commit
 
 ## Commit workflow
 
 1. Run in parallel: `git status`, `git diff`, `git log` (recent messages)
 2. Draft the message using the format below
-3. Do not stage files that likely contain secrets
-4. Add â†’ commit â†’ verify with `git status`
+3. Do not stage files that violate Security rules
+4. Add, commit, then verify with `git status`
 5. Pass commit messages via HEREDOC (or PowerShell here-string) for correct formatting
 
 ## Commit message format
 
+Use Conventional Commits. Prefer a **subject-only** message:
+
 ```
 type(scope): short imperative summary
-
-Optional body in plain sentences. No footers.
 ```
 
-- Scope is optional
-- Subject line <= 72 characters, lowercase after the colon
-- Body is plain prose; wrap at 72 characters
-
-Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `ci`, `build`, `perf`, `style`, `revert`
+- Scope is optional; lowercase after the colon
+- Entire commit message (subject + any body) <= 120 characters
+- No multi-paragraph essays; if more detail is needed, keep it under the 120-char cap or put it in the PR body
+- No footers, no trailers, no blank-line "body" blocks unless still within 120 chars total
 
 Forbidden in commit messages:
 
-- Git trailers (`Co-authored-by`, `Signed-off-by`, `Made-with`, `Fixes`, `Closes`, etc.)
-- Tool attribution or `--trailer` flags
+- Git trailers of any kind (`Co-authored-by`, `Signed-off-by`, `Made-with`, `Fixes`, `Closes`, etc.)
+- Co-author / tool attribution lines (including Cursor, Claude, Copilot, Composer)
+- `--trailer` flags
 - The words `cursor`, `composer`, `claude`, or `copilot` (any casing)
+
+## After merge
+
+When a PR is merged (and the user asked to merge or clean up):
+
+1. Prefer GitHub "Automatically delete head branches" (`delete_branch_on_merge`) on the remote - do not rely on manual remote branch deletes
+2. Switch local checkout off the merged feature branch (usually to `main`/`master`)
+3. Delete the local feature branch: `git branch -d <branch>` (`-D` only if `-d` fails and the user confirmed)
+4. Prune stale remotes: `git fetch --prune`
+
+Do not delete branches the user did not ask to clean up, and never delete `main`/`master`.
 
 ## Pull requests
 
@@ -67,100 +75,61 @@ Use `gh` for all GitHub tasks (issues, PRs, checks, releases).
 
 1. In parallel: `git status`, `git diff`, remote tracking check, `git log`, `git diff [base]...HEAD`
 2. Analyze ALL commits in the PR, not only the latest
-3. Push with `-u` if needed (only when asked or task includes push)
+3. Push with `-u` only when authority already allows push
 4. Create PR with Summary + Test plan body; return the PR URL
 5. Link issues in the PR body (`Closes #N`), not in commit footers
 
 # Code
 
-1. Minimize scope â€” simplest correct diff only; no unrelated changes
-2. Avoid over-engineering â€” no extra abstractions or edge-case handling for unlikely paths
-3. Match existing conventions â€” naming, types, imports, docs level in the codebase
+1. Minimize scope - simplest correct diff only; no unrelated changes
+2. Avoid over-engineering - no extra abstractions or edge-case handling for unlikely paths
+3. Match existing conventions - naming, types, imports, docs level in the codebase
 4. Comments only for non-obvious business logic or deep technical detail
 5. Tests only when requested or they cover real behavior meaningfully
+6. For non-trivial changes, prefer evidence (command output / failing-to-passing check) over claims
 
 # Environment
 
-## Layout
-
-| Path | Role |
-|------|------|
-| `~/Tech/repos` | Everyday coding clones (default work root) |
-| `~/Tech/projects` | Ungroomed / unfinished idea scratch â€” not the default coding root |
-| GitHub Projects | System of record for idea/project status |
-| Portfolio org | Curated **demoable** public showcase only |
-
-## Repos root (`~/Tech/repos`)
-
-- Clone into `~/Tech/repos/<repo-name>` unless the user gives a different path
-- Derive `<repo-name>` from the repository URL
-- Create `~/Tech/repos` if it does not exist
-- If the target directory already exists and is a git repo, use it instead of recloning
-- If the user says "open this in editor" for a GitHub URL, clone there first, then open that directory
-
-## Ideas (`~/Tech/projects`) â†” GitHub Projects
-
-- Local `~/Tech/projects/<slug>` may hold notes/spikes for an idea
-- **GitHub Projects is SoR** for status and grooming â€” do not invent a parallel tracker
-- Prefer linking local folders to the matching GH Project / issue in notes when they exist
-- Do not treat `~/Tech/projects` as the default place to scaffold production apps â€” promote to `~/Tech/repos` when actively building
-- Do not install or assume personal `AGENTS.md` wiring under `~/Tech/projects` unless the user asks
-
-## Portfolio (demoable only)
-
-- Portfolio org is for **shipped / demoable** work worth showing â€” not every idea or private spike
-- Personal coding defaults to private repos under `~/Tech/repos`
-- Do not create, fork, or push to the portfolio org unless the user explicitly asks to publish/promote
-- Prefer promote-once (visibility flip, transfer, or link from a portfolio site) over maintaining twin remotes
-
-## Dotfiles
-
-This standards repo: `~/Tech/repos/cursor-dotfiles`
-
-## Overrides
-
-- User provides an explicit path â†’ use that path
-- Repo is already open in the workspace â†’ work in place; do not reclone
-- Machine-specific notes may live in `rules/machines/<machine>.local.md` (gitignored)
+- Default work root: `~/Tech/repos` - clone into `~/Tech/repos/<repo-name>` unless given another path
+- Create `~/Tech/repos` if missing; if the target already exists as a git repo, use it; do not reclone
+- Explicit path or an already-open workspace wins - work in place
+- Do not invent a parallel status tracker; GitHub Projects is the system of record when status matters
+- Ask before create/fork/push/promote to the portfolio org
+- CLI standards install covers git repos under `~/Tech` except `~/Tech/projects`
+- Dotfiles source: `~/Tech/repos/cursor-dotfiles`
 
 # Behavior
 
-## Real environment
-
-This is a real environment with full shell access and network.
-
-- Run commands and use tools to investigate and solve problems
-- Do not give up after a single failure â€” try alternatives, diagnose, retry
-
-## Conversation context
-
-- Use the full conversation history to infer intent
-- Mid-task messages are usually steering, not canceling
-
-## Communication
-
-- Use markdown links for web content; full URLs and paths
-- Precise prose; length proportional to the task â€” concise, not telegraphic
-- Prefer simple language over jargon
-- Do not overuse bolding or backticks
-- No engagement baiting at the end of responses
-- In copy-paste command blocks, write full commands â€” no `...` omissions
+- Investigate with tools; on failure try alternatives, diagnose, and retry
+- Communicate concisely and proportionally - no fluff or closing CTAs; full commands in copy-paste blocks
 
 # Decision authority
 
-Default to asking before anything beyond the immediate ask. The agent implements; the user decides direction.
+The agent implements; the user decides direction.
+Stay inside the ask. Prefer one batched question over many.
 
 ## Decide without asking
 
-- Implementation details that follow existing patterns in the codebase
+- Local implementation that follows existing patterns in the codebase
 - Naming, file placement, and structure consistent with `code.md`
-- Which existing utility or library already in the project to reuse
+- Reusing an existing project utility/library instead of adding a new one
+- Minimal adjacent edits strictly required for the change to be correct
+  (e.g. update a caller the edit breaks) - not drive-by cleanup
 
 ## Ask first
 
-- Adding a new dependency or package
-- Introducing a new abstraction, pattern, or architecture not already present
-- Restructuring, refactoring, or deleting/renaming outside the scope of the request
-- Choices that change API shape, data model, or user-visible behavior when more than one reasonable approach exists
+- Adding a dependency/package, or a new helper that duplicates existing code
+- New abstraction, pattern, or architecture not already in the project
+- Restructure, refactor, delete, or rename beyond what the change requires
+- API shape, data model, or user-visible behavior with more than one
+  reasonable approach
+- Push, publish, deploy, delete remote data, message people, or change
+  access/billing
+- Commit or open a PR unless the user asked or the task clearly includes
+  commit/PR (push still requires an explicit ask)
 
-If unsure whether something needs confirmation, ask.
+## How to ask
+
+- Batch open questions into one message
+- Prefer a short recommended option plus 1-2 alternatives
+- Ask on medium or high blast radius; do not interrupt for low-risk local choices

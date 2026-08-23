@@ -36,13 +36,13 @@ $parts.Add(@"
 
 # Agent instructions
 
-Personal global standards for Cursor CLI (and any tool that reads ``AGENTS.md``).
+Personal global standards for Cursor CLI and IDE Agent.
 Edit files under ``rules/``, then rebuild. Source of truth is ``rules/``, not this file.
 "@)
 
 foreach ($name in $Order) {
   $path = Join-Path $RulesDir $name
-  $body = (Get-Content -LiteralPath $path -Raw).TrimEnd()
+  $body = (Get-Content -LiteralPath $path -Raw -Encoding UTF8).TrimEnd()
   $parts.Add("")
   $parts.Add($body)
 }

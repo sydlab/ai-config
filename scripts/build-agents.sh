@@ -28,7 +28,7 @@ done
 
 # Agent instructions
 
-Personal global standards for Cursor CLI (and any tool that reads `AGENTS.md`).
+Personal global standards for Cursor CLI and IDE Agent.
 Edit files under `rules/`, then rebuild. Source of truth is `rules/`, not this file.
 EOF
   for name in "${ORDER[@]}"; do

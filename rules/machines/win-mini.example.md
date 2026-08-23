@@ -3,5 +3,6 @@
 
 OS: Windows 11
 Shell: PowerShell
-Repos root: C:\Users\<you>\Tech\repos
+Work root: C:\Users\<you>\Tech\repos
+CLI install root: C:\Users\<you>\Tech (skips Tech\projects)
 Dotfiles: C:\Users\<you>\Tech\repos\cursor-dotfiles

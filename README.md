@@ -1,12 +1,17 @@
 # cursor-dotfiles
 
-Git storage for **personal global agent standards**. Aimed at Cursor CLI (`agent`), which reads `AGENTS.md` in the project root — there is no separate CLI global-rules file.
+Git storage for **personal global agent standards**. One `rules/` tree builds:
+
+- `AGENTS.md` — linked into git repos under `~/Tech` (CLI / anything that reads it)
+- `~/.cursor/rules/00-personal-standards.mdc` — IDE Agent (`alwaysApply`)
 
 ## What this buys you
 
-- Same standards on every repo under `~/Tech/repos` after install (Mac + Win)
+- Same standards on Mac + Windows after pull + install
 - Less re-prompting (git, security, code taste, decision authority)
 - One place to edit prefs (`rules/`), then rebuild + re-link
+
+Standards highlights (see `rules/` for full text): short Conventional Commits (<=120 chars, no trailers/co-authors), push only when asked, local branch cleanup after merge, GitHub `delete_branch_on_merge` preferred for remotes.
 
 ## Source of truth
 
@@ -15,8 +20,8 @@ Git storage for **personal global agent standards**. Aimed at Cursor CLI (`agent
 ```
 rules/*.md                # edit these
 scripts/build-agents.*    # cats rules → AGENTS.md
-scripts/install.*         # build, then link/copy into ~/Tech/repos
-AGENTS.md                 # generated runtime file (committed for clones)
+scripts/install.*         # build, link repos, write IDE .mdc
+AGENTS.md                 # generated (committed for clones)
 ```
 
 ## Setup (each machine)
@@ -39,15 +44,31 @@ chmod +x scripts/*.sh
 ./scripts/install.sh
 ```
 
-Install rebuilds `AGENTS.md` from `rules/`, places it in each git repo under `~/Tech/repos` (symlink via `mklink` when possible; copy fallback), and adds `AGENTS.md` to that repo’s **local** `.git/info/exclude` so it stays personal.
+Install:
+
+1. Rebuilds `AGENTS.md` from `rules/`
+2. Finds git repos under `~/Tech` (recursive), **skips** `~/Tech/projects`
+3. Symlinks (or copies) `AGENTS.md` into each repo; adds it to local `.git/info/exclude`
+4. Writes `~/.cursor/rules/00-personal-standards.mdc` for IDE Agent
 
 ## Sync after editing standards
 
 1. Edit `rules/*.md` only
 2. Commit / pull on the other machine
-3. Re-run `install.ps1` / `install.sh` (rebuilds `AGENTS.md`, refreshes links)
+3. Re-run `install.ps1` / `install.sh`
 
-New repo under `~/Tech/repos` → re-run install once.
+New git repo under `~/Tech` (outside `projects`) → re-run install once.
+
+## Coverage
+
+| Surface | Where it applies |
+|---------|------------------|
+| CLI `AGENTS.md` | Git repos under `~/Tech`, except `~/Tech/projects` |
+| IDE `.mdc` | `~/.cursor/rules/` on this machine after install (not Cursor account sync) |
+
+`~/Tech/.cursor` is unrelated; this install does not manage it.
+
+Default **work** root remains `~/Tech/repos`. Scratch under `projects` stays thin on purpose (no `AGENTS.md` wiring).
 
 ## Not tracked
 
@@ -55,4 +76,4 @@ cli-config, built-in skills, chat history, plugins, per-project app rules, `rule
 
 ## IDE note
 
-Cursor **User Rules** (Customize → Rules) are separate from CLI `AGENTS.md`. Optional for IDE Agent; this repo’s primary path is CLI install.
+Cursor **Settings → User Rules** (account UI) is separate and not written by this repo. Prefer the installed `~/.cursor/rules/00-personal-standards.mdc` so Mac and mini stay aligned via git + install. Avoid maintaining a second hand-edited copy in the Settings UI.
