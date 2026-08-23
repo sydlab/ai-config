@@ -2,27 +2,32 @@
 
 Git storage for **personal global agent standards**. One `rules/` tree builds:
 
-- `AGENTS.md` — linked into git repos under `~/Tech` (CLI / anything that reads it)
-- `~/.cursor/rules/00-personal-standards.mdc` — IDE Agent (`alwaysApply`)
+- `AGENTS.md` — lean always-on core, linked into git repos under `~/Tech`
+- `~/.cursor/rules/00-personal-standards.mdc` — same core for IDE (`alwaysApply: true`)
+- `~/.cursor/rules/10-git-workflow.mdc` — commit/PR/merge procedures (`alwaysApply: false`, agent-requested)
+
+Ask/Plan cannot commit or push anyway; heavy git procedure stays out of the always-on file so every prompt stays lighter.
 
 ## What this buys you
 
 - Same standards on Mac + Windows after pull + install
-- Less re-prompting (git, security, code taste, decision authority)
-- One place to edit prefs (`rules/`), then rebuild + re-link
+- Less re-prompting (security, code taste, decision authority)
+- Git **limits** always on; git **procedures** only when committing/PRing
 
-Standards highlights (see `rules/` for full text): short Conventional Commits (<=120 chars, no trailers/co-authors), push only when asked, local branch cleanup after merge, GitHub `delete_branch_on_merge` preferred for remotes.
+Standards highlights: Conventional Commits (<=120 chars, no trailers/co-authors), push only when asked, never push straight to `main` (branch + PR), local cleanup after merge, GitHub `delete_branch_on_merge` for remotes.
 
 ## Source of truth
 
 **Edit `rules/*.md` only.** `AGENTS.md` is **generated** — do not hand-edit it.
 
 ```
-rules/*.md                # edit these
-scripts/build-agents.*    # cats rules → AGENTS.md
-scripts/install.*         # build, link repos, write IDE .mdc
-AGENTS.md                 # generated (committed for clones)
+rules/security.md, git.md, code.md, ...   # always-on → AGENTS.md
+rules/git-workflow.md                     # NOT in AGENTS.md → IDE 10-git-workflow.mdc
+scripts/build-agents.*                    # cats always-on rules → AGENTS.md
+scripts/install.*                         # build, link repos, write IDE .mdc files
 ```
+
+`git-workflow.md` is excluded from the build-agents file list on purpose.
 
 ## Setup (each machine)
 
@@ -46,10 +51,10 @@ chmod +x scripts/*.sh
 
 Install:
 
-1. Rebuilds `AGENTS.md` from `rules/`
+1. Rebuilds lean `AGENTS.md` from always-on `rules/`
 2. Finds git repos under `~/Tech` (recursive), **skips** `~/Tech/projects`
 3. Symlinks (or copies) `AGENTS.md` into each repo; adds it to local `.git/info/exclude`
-4. Writes `~/.cursor/rules/00-personal-standards.mdc` for IDE Agent
+4. Writes `00-personal-standards.mdc` (always) and `10-git-workflow.mdc` (agent-requested)
 
 ## Sync after editing standards
 
@@ -63,8 +68,9 @@ New git repo under `~/Tech` (outside `projects`) → re-run install once.
 
 | Surface | Where it applies |
 |---------|------------------|
-| CLI `AGENTS.md` | Git repos under `~/Tech`, except `~/Tech/projects` |
-| IDE `.mdc` | `~/.cursor/rules/` on this machine after install (not Cursor account sync) |
+| CLI `AGENTS.md` | Always-on core in git repos under `~/Tech`, except `projects` |
+| IDE `00-*.mdc` | Always-on core on this machine |
+| IDE `10-git-workflow.mdc` | When agent pulls it in for commit/PR/merge work |
 
 `~/Tech/.cursor` is unrelated; this install does not manage it.
 
@@ -76,4 +82,4 @@ cli-config, built-in skills, chat history, plugins, per-project app rules, `rule
 
 ## IDE note
 
-Cursor **Settings → User Rules** (account UI) is separate and not written by this repo. Prefer the installed `~/.cursor/rules/00-personal-standards.mdc` so Mac and mini stay aligned via git + install. Avoid maintaining a second hand-edited copy in the Settings UI.
+Cursor **Settings → User Rules** (account UI) is separate and not written by this repo. Prefer the installed `~/.cursor/rules/*.mdc` files so Mac and mini stay aligned via git + install.

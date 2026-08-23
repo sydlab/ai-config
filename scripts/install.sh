@@ -10,6 +10,8 @@ TECH_ROOT="${HOME}/Tech"
 PROJECTS_ROOT="${TECH_ROOT}/projects"
 CURSOR_RULES_DIR="${HOME}/.cursor/rules"
 MDC_PATH="${CURSOR_RULES_DIR}/00-personal-standards.mdc"
+GIT_WORKFLOW_SRC="${DOTFILES}/rules/git-workflow.md"
+GIT_WORKFLOW_MDC="${CURSOR_RULES_DIR}/10-git-workflow.mdc"
 
 "$SCRIPT_DIR/build-agents.sh"
 
@@ -19,7 +21,7 @@ if [[ ! -d "$TECH_ROOT" ]]; then
 fi
 
 mkdir -p "$CURSOR_RULES_DIR"
-# Drop CLI-oriented generated preamble; keep standards body under a short title
+# Always-on core from AGENTS.md
 {
   cat <<'EOF'
 ---
@@ -30,7 +32,6 @@ alwaysApply: true
 # Agent instructions
 
 EOF
-  # Skip first comment + title + intro paragraph from AGENTS.md
   awk '
     BEGIN { skip=1 }
     /^# Security$/ { skip=0 }
@@ -38,6 +39,24 @@ EOF
   ' "$AGENTS_SRC"
 } > "$MDC_PATH"
 echo "IDE  $MDC_PATH"
+
+# Agent-requested git procedures (not in AGENTS.md)
+if [[ ! -f "$GIT_WORKFLOW_SRC" ]]; then
+  echo "Missing $GIT_WORKFLOW_SRC" >&2
+  exit 1
+fi
+{
+  cat <<'EOF'
+---
+description: Git commit, PR, and post-merge cleanup procedures - use when committing, opening a PR, merging, or cleaning up branches
+alwaysApply: false
+---
+
+EOF
+  cat "$GIT_WORKFLOW_SRC"
+  printf '\n'
+} > "$GIT_WORKFLOW_MDC"
+echo "IDE  $GIT_WORKFLOW_MDC (agent-requested)"
 
 linked=0
 skipped=0

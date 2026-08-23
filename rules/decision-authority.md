@@ -22,6 +22,8 @@ Stay inside the ask. Prefer one batched question over many.
   access/billing
 - Commit or open a PR unless the user asked or the task clearly includes
   commit/PR (push still requires an explicit ask)
+- Never push commits directly to `main`/`master` - always use a feature
+  branch and open a PR (even when push is allowed)
 
 ## How to ask
 

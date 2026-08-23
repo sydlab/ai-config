@@ -25,6 +25,8 @@ if (-not (Test-Path $TechRoot)) {
 $ProjectsRoot = [System.IO.Path]::GetFullPath((Join-Path $TechRoot "projects"))
 $CursorRulesDir = Join-Path $HOME ".cursor\rules"
 $MdcPath = Join-Path $CursorRulesDir "00-personal-standards.mdc"
+$GitWorkflowSrc = Join-Path $Dotfiles "rules\git-workflow.md"
+$GitWorkflowMdc = Join-Path $CursorRulesDir "10-git-workflow.mdc"
 
 $linked = 0
 $skipped = 0
@@ -76,6 +78,7 @@ function Write-IdeRules {
   if (-not (Test-Path $CursorRulesDir)) {
     New-Item -ItemType Directory -Path $CursorRulesDir -Force | Out-Null
   }
+
   $raw = Get-Content -LiteralPath $AgentsSrcFull -Raw -Encoding UTF8
   $idx = $raw.IndexOf("# Security")
   if ($idx -lt 0) { throw "AGENTS.md missing # Security section" }
@@ -94,6 +97,23 @@ $body
   if (-not $mdc.EndsWith("`n")) { $mdc += "`n" }
   [System.IO.File]::WriteAllText($MdcPath, $mdc, [System.Text.UTF8Encoding]::new($false))
   Write-Host "IDE  $MdcPath"
+
+  if (-not (Test-Path -LiteralPath $GitWorkflowSrc)) {
+    throw "Missing $GitWorkflowSrc"
+  }
+  $wfBody = (Get-Content -LiteralPath $GitWorkflowSrc -Raw -Encoding UTF8).TrimEnd() + "`n"
+  $wfMdc = @"
+---
+description: Git commit, PR, and post-merge cleanup procedures - use when committing, opening a PR, merging, or cleaning up branches
+alwaysApply: false
+---
+
+$wfBody
+"@
+  $wfMdc = $wfMdc -replace "`r`n", "`n" -replace "`r", "`n"
+  if (-not $wfMdc.EndsWith("`n")) { $wfMdc += "`n" }
+  [System.IO.File]::WriteAllText($GitWorkflowMdc, $wfMdc, [System.Text.UTF8Encoding]::new($false))
+  Write-Host "IDE  $GitWorkflowMdc (agent-requested)"
 }
 
 Write-IdeRules
