@@ -36,6 +36,16 @@ Install:
 
 It does not scan `~/Tech` and does not copy `AGENTS.md` into other repositories. On Windows, symlink creation must succeed. If it fails, enable Developer Mode and run install again. Install will not leave a copy behind.
 
+To remove old personal symlinks from a previous install:
+
+```powershell
+.\scripts\uninstall-legacy-agents.ps1
+```
+
+```bash
+./scripts/uninstall-legacy-agents.sh
+```
+
 ## After you change a standard
 
 1. Edit `standards/*.md` or `skills/git-workflow/SKILL.md`
