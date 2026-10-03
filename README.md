@@ -46,15 +46,48 @@ To remove old personal symlinks from a previous install:
 ./scripts/uninstall-legacy-agents.sh
 ```
 
+## Sync across machines
+
+Optional automation after install:
+
+```powershell
+.\scripts\install-sync.ps1
+```
+
+```bash
+./scripts/install-sync.sh
+```
+
+This installs:
+
+- A **post-commit** hook in this repo that runs `git push` after each commit (push failures do not undo the commit)
+- A **scheduled pull** that fast-forwards only when the working tree is clean: Windows Task Scheduler at logon and hourly; Mac launchd at login and every hour
+
+Manual pull anytime:
+
+```powershell
+.\scripts\sync-pull.ps1
+```
+
+```bash
+./scripts/sync-pull.sh
+```
+
+Pull skips if you have uncommitted changes or unpushed local commits. After a successful pull, the Cursor rule is rebuilt from `standards/`.
+
 ## After you change a standard
 
 1. Edit `standards/*.md` or `skills/git-workflow/SKILL.md`
-2. Re-run install so the built Cursor rule is refreshed
-3. Commit and pull on the other machine, then run install there
+2. Re-run install (or rely on sync-pull after commit on the other machine)
+3. Commit when ready; with sync installed, push runs from the hook
 
-The skill symlink reads `SKILL.md` directly. The Cursor rule is the built file, so a standards edit is not live until install runs again.
+The skill symlink reads `SKILL.md` directly. The Cursor rule is the built file, so a standards edit is not live until install or sync-pull rebuilds it.
 
-Cursor account User Rules are not written by install. Keep editor-only preferences there; do not duplicate `standards/` or the git skill.
+Cursor account User Rules are not written by install. Do not keep a second copy of `standards/` or the git skill there. Editor-only preferences, such as citation format, can stay in account rules.
+
+## Local folder name
+
+GitHub remote is `sydlab/ai-config`. If this clone is still named `cursor-dotfiles`, close Cursor, rename the folder to `~/Tech/repos/ai-config`, reopen that folder, and run install again so home symlinks use the new path.
 
 ## Not tracked
 
