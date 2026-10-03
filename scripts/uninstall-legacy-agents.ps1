@@ -35,8 +35,9 @@ $skipped = 0
 $repos = @(
   Get-ChildItem -Path $TechRoot -Directory -Recurse -Force -ErrorAction SilentlyContinue |
     Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName ".git") } |
-    ForEach-Object { $_.FullName }
-) | Sort-Object -Unique
+    ForEach-Object { $_.FullName } |
+    Sort-Object -Unique
+)
 
 foreach ($repo in $repos) {
   if ($repo -eq $Dotfiles) { continue }
@@ -54,7 +55,11 @@ foreach ($repo in $repos) {
   }
 
   $target = $item.Target
-  if ($target.Count -gt 0) { $target = $target[0] }
+  if ($target -is [System.Array]) {
+    $target = [string]$target[0]
+  } else {
+    $target = [string]$target
+  }
   $targetFull = [System.IO.Path]::GetFullPath($target)
   $expected = [System.IO.Path]::GetFullPath($AgentsInDotfiles)
 
