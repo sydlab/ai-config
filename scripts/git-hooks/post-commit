@@ -1,0 +1,14 @@
+#!/bin/sh
+# Push after commit when origin is configured. Never fails the commit.
+set -e
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+cd "$repo_root" || exit 0
+
+branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null)" || exit 0
+
+if ! git remote get-url origin >/dev/null 2>&1; then
+  exit 0
+fi
+
+git push origin HEAD 2>/dev/null || true
