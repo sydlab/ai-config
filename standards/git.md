@@ -23,8 +23,9 @@ Use Conventional Commits, subject-only preferred:
 type(scope): short imperative summary
 ```
 
-- Entire commit message <= 120 characters
+- Entire commit message <= 120 characters. Subject only; no body
 - No trailers, no Co-authored-by, no tool attribution, no `--trailer`
 - Do not use the words `cursor`, `composer`, `claude`, or `copilot` (any casing)
+- Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `ci`, `build`, `perf`, `style`, `revert`
 
-When actually committing, opening a PR, or cleaning up after merge, follow the **git-workflow** rule (`rules/git-workflow.md` / IDE `10-git-workflow.mdc`).
+When actually committing, opening a PR, or cleaning up after merge, follow the **git-workflow** skill (`skills/git-workflow/SKILL.md`).

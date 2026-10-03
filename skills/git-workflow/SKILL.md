@@ -1,3 +1,8 @@
+---
+name: git-workflow
+description: Git commit, PR, and post-merge cleanup procedures. Use when the user asked to commit, open a PR, merge, or clean up branches.
+---
+
 # Git workflow
 
 Procedures for commit, PR, and post-merge cleanup. Use when the user asked to commit, open a PR, merge, or clean up branches - not needed for Ask/Plan advice-only chats.

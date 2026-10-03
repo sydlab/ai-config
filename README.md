@@ -1,48 +1,26 @@
-# cursor-dotfiles
+# ai-config
 
-Git storage for **personal global agent standards**. One `rules/` tree builds:
+Git storage for personal global agent standards. Edit the source files, then install so this machine's home directory points at them.
 
-- `AGENTS.md` — lean always-on core, linked into git repos under `~/Tech`
-- `~/.cursor/rules/00-personal-standards.mdc` — same core for IDE (`alwaysApply: true`)
-- `~/.cursor/rules/10-git-workflow.mdc` — commit/PR/merge procedures (`alwaysApply: false`, agent-requested)
-
-Ask/Plan cannot commit or push anyway; heavy git procedure stays out of the always-on file so every prompt stays lighter.
-
-## What this buys you
-
-- Same standards on Mac + Windows after pull + install
-- Less re-prompting (security, code taste, decision authority)
-- Git **limits** always on; git **procedures** only when committing/PRing
-
-Standards highlights: Conventional Commits (<=120 chars, no trailers/co-authors), push only when asked, never push straight to `main` (branch + PR), local cleanup after merge, GitHub `delete_branch_on_merge` for remotes.
-
-## Source of truth
-
-**Edit `rules/*.md` only.** `AGENTS.md` is **generated** — do not hand-edit it.
+## What you edit
 
 ```
-rules/security.md, git.md, code.md, ...   # always-on → AGENTS.md
-rules/git-workflow.md                     # NOT in AGENTS.md → IDE 10-git-workflow.mdc
-scripts/build-agents.*                    # cats always-on rules → AGENTS.md
-scripts/install.*                         # build, link repos, write IDE .mdc files
+standards/*.md                         # always-on personal standards
+skills/git-workflow/SKILL.md           # commit, PR, and cleanup steps
+rules/machines/*.local.md              # this machine only, not committed
 ```
 
-`git-workflow.md` is excluded from the build-agents file list on purpose.
+`standards/` is the source for the Cursor rule. `skills/git-workflow/` is the source for the skill. Do not hand-edit `build/`.
 
-## Setup (each machine)
+## What install does
 
-```bash
-git clone https://github.com/sydlab/cursor-dotfiles.git ~/Tech/repos/cursor-dotfiles
-cd ~/Tech/repos/cursor-dotfiles
-```
-
-Windows (PowerShell; Developer Mode recommended for symlinks):
+Windows:
 
 ```powershell
 .\scripts\install.ps1
 ```
 
-Mac/Linux:
+Mac or Linux:
 
 ```bash
 chmod +x scripts/*.sh
@@ -51,35 +29,23 @@ chmod +x scripts/*.sh
 
 Install:
 
-1. Rebuilds lean `AGENTS.md` from always-on `rules/`
-2. Finds git repos under `~/Tech` (recursive), **skips** `~/Tech/projects`
-3. Symlinks (or copies) `AGENTS.md` into each repo; adds it to local `.git/info/exclude`
-4. Writes `00-personal-standards.mdc` (always) and `10-git-workflow.mdc` (agent-requested)
+1. Builds `build/00-personal-standards.mdc` from `standards/*.md`
+2. Symlinks `~/.cursor/rules/00-personal-standards.mdc` to that built file
+3. Symlinks `~/.agents/skills/git-workflow` to `skills/git-workflow`
+4. Removes `~/.cursor/rules/10-git-workflow.mdc` if a previous install left it there
 
-## Sync after editing standards
+It does not scan `~/Tech` and does not copy `AGENTS.md` into other repositories. On Windows, symlink creation must succeed. If it fails, enable Developer Mode and run install again. Install will not leave a copy behind.
 
-1. Edit `rules/*.md` only
-2. Commit / pull on the other machine
-3. Re-run `install.ps1` / `install.sh`
+## After you change a standard
 
-New git repo under `~/Tech` (outside `projects`) → re-run install once.
+1. Edit `standards/*.md` or `skills/git-workflow/SKILL.md`
+2. Re-run install so the built Cursor rule is refreshed
+3. Commit and pull on the other machine, then run install there
 
-## Coverage
+The skill symlink reads `SKILL.md` directly. The Cursor rule is the built file, so a standards edit is not live until install runs again.
 
-| Surface | Where it applies |
-|---------|------------------|
-| CLI `AGENTS.md` | Always-on core in git repos under `~/Tech`, except `projects` |
-| IDE `00-*.mdc` | Always-on core on this machine |
-| IDE `10-git-workflow.mdc` | When agent pulls it in for commit/PR/merge work |
-
-`~/Tech/.cursor` is unrelated; this install does not manage it.
-
-Default **work** root remains `~/Tech/repos`. Scratch under `projects` stays thin on purpose (no `AGENTS.md` wiring).
+Cursor account User Rules are not written by install. Keep editor-only preferences there; do not duplicate `standards/` or the git skill.
 
 ## Not tracked
 
-cli-config, built-in skills, chat history, plugins, per-project app rules, `rules/machines/*.local.md`
-
-## IDE note
-
-Cursor **Settings → User Rules** (account UI) is separate and not written by this repo. Prefer the installed `~/.cursor/rules/*.mdc` files so Mac and mini stay aligned via git + install.
+`build/`, cli-config, chat history, plugins, per-project rules, `rules/machines/*.local.md`

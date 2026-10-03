@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Build AGENTS.md from rules/*.md (source of truth). Do not hand-edit AGENTS.md.
+# Build build/00-personal-standards.mdc from standards/*.md. Do not hand-edit the built file.
 set -euo pipefail
 
 DOTFILES="$(cd "$(dirname "$0")/.." && pwd)"
-RULES="$DOTFILES/rules"
-OUT="$DOTFILES/AGENTS.md"
+STANDARDS="$DOTFILES/standards"
+OUT_DIR="$DOTFILES/build"
+OUT="$OUT_DIR/00-personal-standards.mdc"
 
 ORDER=(
   security.md
@@ -16,24 +17,31 @@ ORDER=(
 )
 
 for name in "${ORDER[@]}"; do
-  if [[ ! -f "$RULES/$name" ]]; then
-    echo "Missing rule file: $RULES/$name" >&2
+  if [[ ! -f "$STANDARDS/$name" ]]; then
+    echo "Missing standards file: $STANDARDS/$name" >&2
     exit 1
   fi
 done
 
+mkdir -p "$OUT_DIR"
+
 {
   cat <<'EOF'
-<!-- GENERATED from rules/*.md - do not edit by hand. Run: ./scripts/install.sh (or ./scripts/build-agents.sh) -->
+---
+description: Personal global standards (from ai-config)
+alwaysApply: true
+---
 
 # Agent instructions
 
-Personal global standards for Cursor CLI and IDE Agent.
-Edit files under `rules/`, then rebuild. Source of truth is `rules/`, not this file.
 EOF
+  first=1
   for name in "${ORDER[@]}"; do
-    printf '\n'
-    cat "$RULES/$name"
+    if [[ "$first" -eq 0 ]]; then
+      printf '\n'
+    fi
+    first=0
+    cat "$STANDARDS/$name"
     printf '\n'
   done
 } > "$OUT"
