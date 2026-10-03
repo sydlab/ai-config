@@ -28,9 +28,9 @@ function Remove-ExistingLinkTarget {
     [string]$Path,
     [switch]$AllowFile
   )
-  if (-not (Test-Path -LiteralPath $Path)) { return }
-
-  $item = Get-Item -LiteralPath $Path -Force
+  # Do not use Test-Path here: it follows symlinks and returns false for broken links.
+  $item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+  if (-not $item) { return }
   $isLink = $item.Attributes -band [IO.FileAttributes]::ReparsePoint
   if ($isLink) {
     if ($item.PSIsContainer) {
@@ -38,7 +38,10 @@ function Remove-ExistingLinkTarget {
     } else {
       $proc = Start-Process -FilePath "cmd.exe" -ArgumentList @("/c", "del", "`"$Path`"") -Wait -PassThru -NoNewWindow
     }
-    if ($proc.ExitCode -ne 0 -or (Test-Path -LiteralPath $Path)) {
+    if ($proc.ExitCode -ne 0) {
+      throw "Could not remove existing symlink: $Path"
+    }
+    if (Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue) {
       throw "Could not remove existing symlink: $Path"
     }
     return
@@ -62,7 +65,11 @@ function New-Symlink {
   if ($Directory) { $linkArgs += "/D" }
   $linkArgs += @("`"$Dest`"", "`"$Target`"")
   $proc = Start-Process -FilePath "cmd.exe" -ArgumentList $linkArgs -Wait -PassThru -NoNewWindow
-  if ($proc.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $Dest)) {
+  if ($proc.ExitCode -ne 0) {
+    throw "Could not create symlink $Dest -> $Target. Enable Windows Developer Mode (Settings, System, For developers), then re-run install. No copy was made."
+  }
+  $created = Get-Item -LiteralPath $Dest -Force -ErrorAction SilentlyContinue
+  if (-not $created) {
     throw "Could not create symlink $Dest -> $Target. Enable Windows Developer Mode (Settings, System, For developers), then re-run install. No copy was made."
   }
   $item = Get-Item -LiteralPath $Dest -Force
@@ -83,7 +90,7 @@ if (-not (Test-Path $AgentsSkillsDir)) {
   New-Item -ItemType Directory -Path $AgentsSkillsDir -Force | Out-Null
 }
 
-if (Test-Path -LiteralPath $OldWorkflowMdc) {
+if (Get-Item -LiteralPath $OldWorkflowMdc -Force -ErrorAction SilentlyContinue) {
   Remove-ExistingLinkTarget -Path $OldWorkflowMdc -AllowFile
   Write-Host "Removed $OldWorkflowMdc"
 }
