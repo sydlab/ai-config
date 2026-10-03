@@ -33,6 +33,11 @@ cat > "$PLIST_PATH" <<EOF
     <string>/bin/bash</string>
     <string>${PULL_SCRIPT}</string>
   </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
   <key>RunAtLoad</key>
   <true/>
   <key>StartInterval</key>
