@@ -21,7 +21,10 @@ if (-not (Test-Path $hooksDir)) {
   New-Item -ItemType Directory -Path $hooksDir -Force | Out-Null
 }
 
-Copy-Item -LiteralPath $HookSrc -Destination $HookDest -Force
+$hookBody = Get-Content -LiteralPath $HookSrc -Raw -Encoding UTF8
+$hookBody = $hookBody -replace "`r`n", "`n" -replace "`r", "`n"
+if (-not $hookBody.EndsWith("`n")) { $hookBody += "`n" }
+[System.IO.File]::WriteAllText($HookDest, $hookBody, [System.Text.UTF8Encoding]::new($false))
 Write-Host "Hook $HookDest"
 
 $action = New-ScheduledTaskAction `
