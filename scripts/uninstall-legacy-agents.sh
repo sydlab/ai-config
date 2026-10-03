@@ -2,14 +2,14 @@
 # Remove personal AGENTS.md symlinks left by the old install (pointing at this repo's AGENTS.md).
 set -euo pipefail
 
-DOTFILES="$(cd "$(dirname "$0")/.." && pwd)"
-AGENTS_IN_DOTFILES="$(cd "$DOTFILES" && pwd)/AGENTS.md"
-TECH_ROOT="${HOME}/Tech"
-PROJECTS_ROOT="${TECH_ROOT}/projects"
-
 resolve_path() {
   python3 -c "import os, sys; print(os.path.realpath(sys.argv[1]))" "$1"
 }
+
+DOTFILES="$(cd "$(dirname "$0")/.." && pwd)"
+AGENTS_IN_DOTFILES="$(resolve_path "$DOTFILES/AGENTS.md")"
+TECH_ROOT="${HOME}/Tech"
+PROJECTS_ROOT="${TECH_ROOT}/projects"
 
 removed=0
 skipped=0
