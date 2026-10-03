@@ -1,6 +1,9 @@
 # Never commit machine-specific local overlays
 rules/machines/*.local.md
 
+# Built Cursor rule. Install rebuilds this.
+build/
+
 # OS / editor
 .DS_Store
 Thumbs.db
@@ -9,3 +12,4 @@ Thumbs.db
 *.log
 
 .idea
+*.iml

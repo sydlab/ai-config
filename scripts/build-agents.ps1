@@ -1,15 +1,15 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Build AGENTS.md from rules/*.md (source of truth). Do not hand-edit AGENTS.md.
+  Build build/00-personal-standards.mdc from standards/*.md. Do not hand-edit the built file.
 #>
 $ErrorActionPreference = "Stop"
 
 $Dotfiles = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$RulesDir = Join-Path $Dotfiles "rules"
-$OutFile = Join-Path $Dotfiles "AGENTS.md"
+$StandardsDir = Join-Path $Dotfiles "standards"
+$OutDir = Join-Path $Dotfiles "build"
+$OutFile = Join-Path $OutDir "00-personal-standards.mdc"
 
-# Stable order — not filesystem sort
 $Order = @(
   "security.md",
   "git.md",
@@ -21,35 +21,37 @@ $Order = @(
 
 $missing = @()
 foreach ($name in $Order) {
-  $path = Join-Path $RulesDir $name
+  $path = Join-Path $StandardsDir $name
   if (-not (Test-Path -LiteralPath $path)) {
     $missing += $name
   }
 }
 if ($missing.Count -gt 0) {
-  throw ("Missing rule files: {0}" -f ($missing -join ", "))
+  throw ("Missing standards files: {0}" -f ($missing -join ", "))
+}
+
+if (-not (Test-Path $OutDir)) {
+  New-Item -ItemType Directory -Path $OutDir -Force | Out-Null
 }
 
 $parts = New-Object System.Collections.Generic.List[string]
-$parts.Add(@"
-<!-- GENERATED from rules/*.md - do not edit by hand. Run: .\scripts\install.ps1 (or .\scripts\build-agents.ps1) -->
-
-# Agent instructions
-
-Personal global standards for Cursor CLI and IDE Agent.
-Edit files under ``rules/``, then rebuild. Source of truth is ``rules/``, not this file.
-"@)
-
 foreach ($name in $Order) {
-  $path = Join-Path $RulesDir $name
+  $path = Join-Path $StandardsDir $name
   $body = (Get-Content -LiteralPath $path -Raw -Encoding UTF8).TrimEnd()
-  $parts.Add("")
   $parts.Add($body)
 }
 
-$text = ($parts -join "`n") + "`n"
-# Normalize to LF for stable diffs across machines
+$header = @"
+---
+description: Personal global standards (from ai-config)
+alwaysApply: true
+---
+
+# Agent instructions
+"@.TrimEnd()
+$text = $header + "`n`n" + ($parts -join "`n`n") + "`n"
 $text = $text -replace "`r`n", "`n" -replace "`r", "`n"
+if (-not $text.EndsWith("`n")) { $text += "`n" }
 [System.IO.File]::WriteAllText($OutFile, $text, [System.Text.UTF8Encoding]::new($false))
 
 Write-Host "Built $OutFile"
