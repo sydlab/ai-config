@@ -60,8 +60,10 @@ Optional automation after install:
 
 This installs:
 
-- A **post-commit** hook in this repo that runs `git push` after each commit (push failures do not undo the commit)
+- A **post-commit** hook in this repo that pushes feature branches after each commit. It does not push `main` or `master`, and a failed push prints a warning without undoing the commit.
 - A **scheduled pull** that fast-forwards only when the working tree is clean: Windows Task Scheduler at logon and hourly; Mac launchd at login and every hour
+
+Pull logs: Windows `%LOCALAPPDATA%\ai-config\sync-pull.log`; Mac `~/Library/Logs/ai-config-sync-pull.log`.
 
 Manual pull anytime:
 
@@ -77,9 +79,10 @@ Pull skips if you have uncommitted changes or unpushed local commits. After a su
 
 ## After you change a standard
 
-1. Edit `standards/*.md` or `skills/git-workflow/SKILL.md`
-2. Re-run install (or rely on sync-pull after commit on the other machine)
-3. Commit when ready; with sync installed, push runs from the hook
+1. On a feature branch, edit `standards/*.md` or `skills/git-workflow/SKILL.md`
+2. Re-run install to use the change on this machine
+3. Commit; with sync installed, the hook pushes the branch
+4. Open a PR and merge it; the other machine picks up `main` on its next scheduled pull
 
 The skill symlink reads `SKILL.md` directly. The Cursor rule is the built file, so a standards edit is not live until install or sync-pull rebuilds it.
 
@@ -87,7 +90,7 @@ Cursor account User Rules are not written by install. Do not keep a second copy 
 
 ## Local folder name
 
-GitHub remote is `sydlab/ai-config`. If this clone is still named `cursor-dotfiles`, close Cursor, rename the folder to `~/Tech/repos/ai-config`, reopen that folder, and run install again so home symlinks use the new path.
+GitHub remote is `sydlab/ai-config`. If this clone is still named `cursor-dotfiles`, close Cursor, rename the folder to `~/Tech/repos/ai-config`, reopen that folder, and run install and install-sync again so the home symlinks and the scheduled pull use the new path.
 
 ## Not tracked
 
