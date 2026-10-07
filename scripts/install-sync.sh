@@ -20,6 +20,11 @@ cp "$HOOK_SRC" "$HOOK_DEST"
 chmod +x "$HOOK_DEST"
 echo "Hook  $HOOK_DEST"
 
+hooks_path="$(git -C "$REPO_ROOT" config --get core.hooksPath || true)"
+if [[ -n "$hooks_path" ]]; then
+  echo "WARNING: core.hooksPath is set to '$hooks_path', so git will not run $HOOK_DEST. Unset it or add this hook there." >&2
+fi
+
 mkdir -p "$HOME/Library/LaunchAgents"
 cat > "$PLIST_PATH" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -54,4 +59,4 @@ launchctl bootout "gui/$(id -u)/${PLIST_LABEL}" 2>/dev/null || true
 launchctl bootstrap "gui/$(id -u)" "$PLIST_PATH"
 echo "Agent $PLIST_PATH"
 echo ""
-echo "Sync: commit pushes via post-commit hook; pull runs at login and every hour when the tree is clean."
+echo "Sync: feature-branch commits push via post-commit hook; pull runs at login and every hour when the tree is clean."
