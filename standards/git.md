@@ -17,7 +17,7 @@ Whether to commit or push is decided by Decision authority. This section is hard
 
 ## Commit message (always)
 
-Use Conventional Commits, subject-only preferred:
+Use Conventional Commits:
 
 ```
 type(scope): short imperative summary
@@ -28,4 +28,4 @@ type(scope): short imperative summary
 - Do not use the words `cursor`, `composer`, `claude`, or `copilot` (any casing)
 - Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `ci`, `build`, `perf`, `style`, `revert`
 
-When actually committing, opening a PR, or cleaning up after merge, follow the **git-workflow** skill (`skills/git-workflow/SKILL.md`).
+When actually committing, opening a PR, or cleaning up after merge, follow the **git-workflow** skill.

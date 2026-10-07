@@ -6,7 +6,7 @@ Stay inside the ask. Prefer one batched question over many.
 ## Decide without asking
 
 - Local implementation that follows existing patterns in the codebase
-- Naming, file placement, and structure consistent with `code.md`
+- Naming, file placement, and structure consistent with the Code section
 - Reusing an existing project utility/library instead of adding a new one
 - Minimal adjacent edits strictly required for the change to be correct
   (e.g. update a caller the edit breaks) - not drive-by cleanup
@@ -22,8 +22,6 @@ Stay inside the ask. Prefer one batched question over many.
   access/billing
 - Commit or open a PR unless the user asked or the task clearly includes
   commit/PR (push still requires an explicit ask)
-- Never push commits directly to `main`/`master` - always use a feature
-  branch and open a PR (even when push is allowed)
 
 ## How to ask
 
