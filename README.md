@@ -63,6 +63,8 @@ This installs:
 - A **post-commit** hook in this repo that pushes feature branches after each commit. It does not push `main` or `master`, and a failed push prints a warning without undoing the commit.
 - A **scheduled pull** that fast-forwards only when the working tree is clean: Windows Task Scheduler at logon and hourly; Mac launchd at login and every hour
 
+If `core.hooksPath` is set in your git config, git ignores this repo's `.git/hooks`, so the hook never runs; install-sync prints a warning when that is the case.
+
 Pull logs: Windows `%LOCALAPPDATA%\ai-config\sync-pull.log`; Mac `~/Library/Logs/ai-config-sync-pull.log`.
 
 Manual pull anytime:

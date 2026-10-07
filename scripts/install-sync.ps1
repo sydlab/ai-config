@@ -27,6 +27,11 @@ if (-not $hookBody.EndsWith("`n")) { $hookBody += "`n" }
 [System.IO.File]::WriteAllText($HookDest, $hookBody, [System.Text.UTF8Encoding]::new($false))
 Write-Host "Hook $HookDest"
 
+$hooksPath = git -C $RepoRoot config --get core.hooksPath
+if ($hooksPath) {
+  Write-Warning "core.hooksPath is set to '$hooksPath', so git will not run $HookDest. Unset it or add this hook there."
+}
+
 $action = New-ScheduledTaskAction `
   -Execute "powershell.exe" `
   -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$PullScript`""
@@ -51,4 +56,4 @@ Register-ScheduledTask `
 
 Write-Host "Task  $TaskName (logon + hourly)"
 Write-Host ""
-Write-Host "Sync: commit pushes via post-commit hook; pull runs on login and every hour when the tree is clean."
+Write-Host "Sync: feature-branch commits push via post-commit hook; pull runs on login and every hour when the tree is clean."
