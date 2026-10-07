@@ -10,9 +10,6 @@ $ScriptDir = $PSScriptRoot
 $Dotfiles = (Resolve-Path (Join-Path $ScriptDir "..")).Path
 
 & (Join-Path $ScriptDir "build-agents.ps1")
-if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) {
-  throw "build-agents.ps1 failed"
-}
 
 $BuiltMdc = (Resolve-Path -LiteralPath (Join-Path $Dotfiles "build\00-personal-standards.mdc")).Path
 $SkillSrc = (Resolve-Path -LiteralPath (Join-Path $Dotfiles "skills\git-workflow")).Path

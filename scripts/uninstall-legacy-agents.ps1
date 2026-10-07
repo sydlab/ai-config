@@ -1,7 +1,8 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Remove personal AGENTS.md symlinks left by the old install (pointing at this repo's AGENTS.md).
+  Remove personal AGENTS.md symlinks left by the old install (pointing at this repo's AGENTS.md,
+  or at AGENTS.md in a folder named cursor-dotfiles or ai-config, so links survive a folder rename).
   Does not delete real project AGENTS.md files.
 #>
 $ErrorActionPreference = "Stop"
@@ -24,9 +25,18 @@ function Test-UnderProjects {
 function Remove-SymlinkFile {
   param([string]$Path)
   $proc = Start-Process -FilePath "cmd.exe" -ArgumentList @("/c", "del", "`"$Path`"") -Wait -PassThru -NoNewWindow
-  if ($proc.ExitCode -ne 0 -and (Test-Path -LiteralPath $Path)) {
+  if ($proc.ExitCode -ne 0 -and (Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue)) {
     throw "Could not remove $Path"
   }
+}
+
+function Test-LegacyTarget {
+  param([string]$TargetFull)
+  if ($TargetFull.Equals([System.IO.Path]::GetFullPath($AgentsInDotfiles), [System.StringComparison]::OrdinalIgnoreCase)) {
+    return $true
+  }
+  $owner = Split-Path -Leaf (Split-Path -Parent $TargetFull)
+  return (Split-Path -Leaf $TargetFull) -eq "AGENTS.md" -and $owner -in @("cursor-dotfiles", "ai-config")
 }
 
 $removed = 0
@@ -47,10 +57,8 @@ foreach ($repo in $repos) {
   }
 
   $dest = Join-Path $repo "AGENTS.md"
-  if (-not (Test-Path -LiteralPath $dest)) { continue }
-
-  $item = Get-Item -LiteralPath $dest -Force
-  if ($item.LinkType -ne "SymbolicLink") {
+  $item = Get-Item -LiteralPath $dest -Force -ErrorAction SilentlyContinue
+  if (-not $item -or $item.LinkType -ne "SymbolicLink") {
     continue
   }
 
@@ -61,9 +69,8 @@ foreach ($repo in $repos) {
     $target = [string]$target
   }
   $targetFull = [System.IO.Path]::GetFullPath($target)
-  $expected = [System.IO.Path]::GetFullPath($AgentsInDotfiles)
 
-  if (-not $targetFull.Equals($expected, [System.StringComparison]::OrdinalIgnoreCase)) {
+  if (-not (Test-LegacyTarget $targetFull)) {
     Write-Host "SKIP $dest (symlink elsewhere)"
     continue
   }

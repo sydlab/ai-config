@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
-# Remove personal AGENTS.md symlinks left by the old install (pointing at this repo's AGENTS.md).
+# Remove personal AGENTS.md symlinks left by the old install (pointing at this repo's AGENTS.md,
+# or at AGENTS.md in a folder named cursor-dotfiles or ai-config, so links survive a folder rename).
 set -euo pipefail
 
 resolve_path() {
   python3 -c "import os, sys; print(os.path.realpath(sys.argv[1]))" "$1"
+}
+
+is_legacy_link() {
+  local link="$1" target owner
+  [[ "$(resolve_path "$link")" == "$AGENTS_IN_DOTFILES" ]] && return 0
+  target="$(readlink "$link")"
+  owner="$(basename "$(dirname "$target")")"
+  [[ "$(basename "$target")" == "AGENTS.md" && ( "$owner" == "cursor-dotfiles" || "$owner" == "ai-config" ) ]]
 }
 
 DOTFILES="$(cd "$(dirname "$0")/.." && pwd)"
@@ -31,8 +40,7 @@ while IFS= read -r -d '' gitentry; do
     continue
   fi
 
-  resolved="$(resolve_path "$dest")"
-  if [[ "$resolved" != "$AGENTS_IN_DOTFILES" ]]; then
+  if ! is_legacy_link "$dest"; then
     echo "SKIP $dest (symlink elsewhere)"
     continue
   fi
