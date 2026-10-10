@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Strips git trailers and common AI tool footers before the commit is finalized.
+# Global hooks — source: ai-config scripts/git-hooks/global/ — install: scripts/install-git-hooks.sh
+
+set -euo pipefail
+
+MSG_FILE="${1:?}"
+SOURCE="${2:-}"
+
+# Do not alter merges, squashes, or cherry-picks (Git supplies the message).
+case "$SOURCE" in
+  merge|squash|cherry-pick) exit 0 ;;
+esac
+
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
+
+python3 - "$MSG_FILE" "$tmp" <<'PY'
+import re
+import sys
+
+src, dst = sys.argv[1], sys.argv[2]
+
+KNOWN_TRAILER = re.compile(
+    r"(?i)^(Co-authored-by|Signed-off-by|Made-with|Helped-by|Reviewed-by|"
+    r"Acked-by|Reported-by|Refers-to|See-also|Thanks-to|"
+    r"Fixes|Closes|Resolves)\b",
+)
+BANNED_LINE = re.compile(
+    r"(?i)\b(cursor|composer|claude|copilot|made-with)\b|co-authored-by",
+)
+
+with open(src, encoding="utf-8", errors="replace") as f:
+    text = f.read()
+
+lines = text.splitlines()
+body: list[str] = []
+for i, line in enumerate(lines):
+    stripped = line.strip()
+    if i > 0 and KNOWN_TRAILER.match(stripped):
+        continue
+    if BANNED_LINE.search(line):
+        continue
+    body.append(line.rstrip())
+
+# Trim trailing blank lines
+while body and not body[-1].strip():
+    body.pop()
+
+out = "\n".join(body)
+if out:
+    out += "\n"
+
+with open(dst, "w", encoding="utf-8") as f:
+    f.write(out)
+PY
+
+mv "$tmp" "$MSG_FILE"

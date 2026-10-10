@@ -7,6 +7,7 @@ Git storage for personal global agent standards. Edit the source files, then ins
 ```
 standards/*.md                         # always-on personal standards
 skills/git-workflow/SKILL.md           # commit, PR, and cleanup steps
+scripts/git-hooks/global/              # global commit-policy hooks
 rules/machines/*.local.md              # this machine only, not committed
 ```
 
@@ -74,6 +75,27 @@ Manual pull anytime:
 ```
 
 Pull skips if you have uncommitted changes or unpushed local commits. After a successful pull, the Cursor rule is rebuilt from `standards/`.
+
+## Global commit hooks
+
+Optional, enforces the commit message rules in `standards/git.md` in every repository on the machine:
+
+```powershell
+.\scripts\install-git-hooks.ps1
+```
+
+```bash
+./scripts/install-git-hooks.sh
+```
+
+This copies `scripts/git-hooks/global/` to `~/.githooks` and sets `git config --global core.hooksPath` to it:
+
+- **prepare-commit-msg** strips trailers and tool footers
+- **commit-msg** rejects trailers, banned words, subjects over 120 characters, and non-conventional subjects
+- **pre-push** re-checks every commit being pushed
+- **post-commit** runs the repository's own `.git/hooks/post-commit`, so the sync push above keeps working
+
+The hooks need `python3` on `PATH`. On Windows they run under Git Bash. Edit the files in `scripts/git-hooks/global/`, then re-run the script.
 
 ## After you change a standard
 

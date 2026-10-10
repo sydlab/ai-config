@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Rejects commit messages with trailers or Cursor / agent references.
+# Global hooks — source: ai-config scripts/git-hooks/global/ — install: scripts/install-git-hooks.sh
+
+set -euo pipefail
+
+MSG_FILE="${1:?}"
+
+python3 - "$MSG_FILE" <<'PY'
+import re
+import sys
+
+path = sys.argv[1]
+msg = open(path, encoding="utf-8", errors="replace").read()
+lines = [ln for ln in msg.splitlines() if ln.strip()]
+
+if not lines:
+    print("commit-msg: empty commit message", file=sys.stderr)
+    sys.exit(1)
+
+subject = lines[0]
+if len(subject) > 120:
+    print(f"commit-msg: subject exceeds 120 characters ({len(subject)})", file=sys.stderr)
+    sys.exit(1)
+
+KNOWN_TRAILER = re.compile(
+    r"(?i)^(Co-authored-by|Signed-off-by|Made-with|Helped-by|Reviewed-by|"
+    r"Acked-by|Reported-by|Refers-to|See-also|Thanks-to|"
+    r"Fixes|Closes|Resolves)\b",
+)
+BANNED = re.compile(
+    r"(?i)\b(cursor|composer|claude|copilot|made-with)\b|co-authored-by",
+)
+
+for i, line in enumerate(lines, start=1):
+    s = line.strip()
+    if i > 1 and KNOWN_TRAILER.match(s):
+        print(f"commit-msg: line {i}: git trailers are not allowed", file=sys.stderr)
+        print(f"  > {line}", file=sys.stderr)
+        sys.exit(1)
+    if BANNED.search(line):
+        print(f"commit-msg: line {i}: Cursor/agent references are not allowed", file=sys.stderr)
+        print(f"  > {line}", file=sys.stderr)
+        sys.exit(1)
+
+# Subject style: type(scope): summary or type: summary (conventional commits, relaxed)
+if not re.match(r"^[a-z][a-z0-9-]*(\([^)]+\))?:\s+\S", subject):
+    print("commit-msg: subject should look like: type: summary  or  type(scope): summary", file=sys.stderr)
+    print(f"  > {subject}", file=sys.stderr)
+    sys.exit(1)
+PY
