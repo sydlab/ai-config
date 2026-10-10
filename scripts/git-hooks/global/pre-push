@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# Blocks push if any new commit on this branch still violates message policy.
+# Global hooks — source: ai-config scripts/git-hooks/global/ — install: scripts/install-git-hooks.sh
+
+set -euo pipefail
+
+remote="${1:-}"
+url="${2:-}"
+
+zero="0000000000000000000000000000000000000000"
+range=""
+
+if [[ -n "$remote" && -n "$url" ]]; then
+  while read -r local_ref local_sha remote_ref remote_sha; do
+    [[ "$local_sha" == "$zero" ]] && continue
+    if [[ "$remote_sha" == "$zero" ]]; then
+      # New branch: check commits not on any remote branch
+      range="$local_sha --not --remotes"
+    else
+      range="${remote_sha}..${local_sha}"
+    fi
+    break
+  done
+fi
+
+# Local push / no remote args: commits ahead of upstream
+if [[ -z "$range" ]]; then
+  upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"
+  if [[ -n "$upstream" ]]; then
+    range="$(git merge-base HEAD "$upstream")..HEAD"
+  else
+    range="HEAD"
+  fi
+fi
+
+[[ -z "$range" ]] && exit 0
+
+failed=0
+while read -r sha; do
+  [[ -z "$sha" ]] && continue
+  if ! git log -1 --format=%B "$sha" | python3 -c "
+import re, sys
+msg = sys.stdin.read()
+lines = [ln for ln in msg.splitlines() if ln.strip()]
+if not lines:
+    sys.exit(1)
+subject = lines[0]
+KNOWN_TRAILER = re.compile(
+    r'(?i)^(Co-authored-by|Signed-off-by|Made-with|Helped-by|Reviewed-by|'
+    r'Acked-by|Reported-by|Refers-to|See-also|Thanks-to|'
+    r'Fixes|Closes|Resolves)\b'
+)
+BANNED = re.compile(r'(?i)\b(cursor|composer|claude|copilot|made-with)\b|co-authored-by')
+for i, line in enumerate(lines):
+    s = line.strip()
+    if i > 0 and KNOWN_TRAILER.match(s):
+        sys.exit(1)
+    if BANNED.search(line):
+        sys.exit(1)
+if len(subject) > 120:
+    sys.exit(1)
+if not re.match(r'^[a-z][a-z0-9-]*(\([^)]+\))?:\s+\S', subject):
+    sys.exit(1)
+"; then
+    echo "pre-push: rejected $(git log -1 --oneline "$sha")" >&2
+    echo "pre-push: fix the commit message or amend, then push again" >&2
+    failed=1
+  fi
+done < <(git rev-list $range)
+
+exit "$failed"

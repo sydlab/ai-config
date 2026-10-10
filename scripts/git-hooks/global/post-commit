@@ -1,0 +1,11 @@
+#!/bin/sh
+# Runs the repository's own .git/hooks/post-commit, which a global core.hooksPath would otherwise skip.
+# Global hooks — source: ai-config scripts/git-hooks/global/ — install: scripts/install-git-hooks.sh
+
+common_dir="$(git rev-parse --git-common-dir 2>/dev/null)" || exit 0
+local_hook="$common_dir/hooks/post-commit"
+
+[ -x "$local_hook" ] || exit 0
+[ "$local_hook" -ef "$0" ] && exit 0
+
+exec "$local_hook" "$@"
