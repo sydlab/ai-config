@@ -13,7 +13,8 @@ MAX_SUBJECT = 120
 KNOWN_TRAILER = re.compile(
     r"(?i)^(Co-authored-by|Signed-off-by|Made-with|Helped-by|Reviewed-by|"
     r"Acked-by|Reported-by|Refers-to|See-also|Thanks-to|"
-    r"Fixes|Closes|Resolves)\b",
+    r"Fixes|Closes|Resolves)"
+    r"(\s*:|\s+([\w.-]+/[\w.-]+)?#\d+|\s+https?://\S+/(issues|pull)/\d+)",
 )
 BANNED = re.compile(
     r"(?i)\b(cursor|composer|claude|copilot|made-with)\b|co-authored-by",
