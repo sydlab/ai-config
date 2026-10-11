@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 HOOKS_SRC="$SCRIPT_DIR/git-hooks/global"
 HOOKS_DEST="${HOME}/.githooks"
-HOOKS=(prepare-commit-msg commit-msg pre-push post-commit)
+HOOKS=(prepare-commit-msg commit-msg pre-push)
 SUPPORT=(commit_policy.py)
 
 if ! command -v python3 >/dev/null 2>&1; then
