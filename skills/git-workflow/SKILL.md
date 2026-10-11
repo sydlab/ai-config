@@ -10,7 +10,7 @@ Procedures for commit, PR, and post-merge cleanup. Use when the user asked to co
 ## Commit workflow
 
 1. Run in parallel: `git status`, `git diff`, `git log` (recent messages)
-2. Draft a Conventional Commits subject-only message (<= 120 chars total; no trailers/co-authors)
+2. Draft the message per the Git commit message rules
 3. Do not stage files that violate Security rules
 4. Add, commit, then verify with `git status`
 5. Pass commit messages via HEREDOC (or PowerShell here-string) for correct formatting
@@ -28,12 +28,10 @@ Do not delete branches the user did not ask to clean up, and never delete `main`
 
 ## Pull requests
 
-Never push commits directly to `main`/`master`. Always commit on a feature branch, push that branch, and open a PR with `gh`.
-
-Use `gh` for all GitHub tasks (issues, PRs, checks, releases).
+Commit on a feature branch, push that branch, and open a PR with `gh`. Use `gh` for all GitHub tasks (issues, PRs, checks, releases).
 
 1. In parallel: `git status`, `git diff`, remote tracking check, `git log`, `git diff [base]...HEAD`
 2. Analyze ALL commits in the PR, not only the latest
-3. Push the feature branch with `-u` only when authority already allows push - never `git push` to `main`/`master`
+3. Push the feature branch with `-u` only when Decision authority allows push
 4. Create PR with Summary + Test plan body; return the PR URL
 5. Link issues in the PR body (`Closes #N`), not in commit footers

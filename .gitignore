@@ -1,6 +1,3 @@
-# Never commit machine-specific local overlays
-rules/machines/*.local.md
-
 # Built Cursor rule. Install rebuilds this.
 build/
 
