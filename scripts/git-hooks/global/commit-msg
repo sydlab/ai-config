@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Rejects commit messages with trailers or Cursor / agent references.
+# Global hooks — source: ai-config scripts/git-hooks/global/ — install: scripts/install-git-hooks.sh
+
+set -euo pipefail
+
+MSG_FILE="${1:?}"
+
+python3 "$(dirname "$0")/commit_policy.py" check "$MSG_FILE"

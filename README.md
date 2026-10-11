@@ -7,6 +7,7 @@ Git storage for personal global agent standards. Edit the source files, then ins
 ```
 standards/*.md                         # always-on personal standards
 skills/git-workflow/SKILL.md           # commit, PR, and cleanup steps
+scripts/git-hooks/global/              # global commit-policy hooks
 ```
 
 `standards/` is the source for the Cursor rule. `skills/git-workflow/` is the source for the skill. Do not hand-edit `build/`.
@@ -73,6 +74,24 @@ Manual pull anytime:
 ```
 
 Pull skips if you have uncommitted changes or unpushed local commits. After a successful pull, the Cursor rule is rebuilt from `standards/`.
+
+## Global commit hooks
+
+Optional, enforces the commit message rules in `standards/git.md` in every repository on the machine:
+
+```bash
+./scripts/install-git-hooks.sh
+```
+
+This copies `scripts/git-hooks/global/` to `~/.githooks` and sets `git config --global core.hooksPath` to it:
+
+- **prepare-commit-msg** strips trailers and tool footers from the body, never the subject
+- **commit-msg** rejects trailers, banned words, subjects over 120 characters, and non-conventional subjects
+- **pre-push** re-checks every non-merge commit on every ref being pushed
+
+The rules live in `commit_policy.py`, which the installer copies alongside the hooks. Git-generated subjects (`Merge `, `Revert "`, `fixup!`, `squash!`, `amend!`) skip the length and format checks but not the trailer and banned-word checks.
+
+A global `core.hooksPath` makes git skip each repository's own `.git/hooks`. The hooks need `python3` on `PATH`. Edit the files in `scripts/git-hooks/global/`, then re-run the script.
 
 ## After you change a standard
 

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Strips git trailers and common AI tool footers before the commit is finalized.
+# Global hooks — source: ai-config scripts/git-hooks/global/ — install: scripts/install-git-hooks.sh
+
+set -euo pipefail
+
+MSG_FILE="${1:?}"
+SOURCE="${2:-}"
+
+# Do not alter merges, squashes, or cherry-picks (Git supplies the message).
+case "$SOURCE" in
+  merge|squash|cherry-pick) exit 0 ;;
+esac
+
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
+
+python3 "$(dirname "$0")/commit_policy.py" strip "$MSG_FILE" "$tmp"
+
+mv "$tmp" "$MSG_FILE"
