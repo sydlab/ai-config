@@ -8,6 +8,7 @@ $ErrorActionPreference = "Stop"
 $HooksSrc = Join-Path $PSScriptRoot "git-hooks\global"
 $HooksDest = Join-Path $HOME ".githooks"
 $Hooks = @("prepare-commit-msg", "commit-msg", "pre-push", "post-commit")
+$Support = @("commit_policy.py")
 
 if (-not (Get-Command python3 -ErrorAction SilentlyContinue)) {
   throw "python3 is required by the commit-msg, prepare-commit-msg, and pre-push hooks."
@@ -17,10 +18,10 @@ if (-not (Test-Path $HooksDest)) {
   New-Item -ItemType Directory -Path $HooksDest -Force | Out-Null
 }
 
-foreach ($hook in $Hooks) {
+foreach ($hook in $Hooks + $Support) {
   $src = Join-Path $HooksSrc $hook
   if (-not (Test-Path -LiteralPath $src)) {
-    throw "Missing hook: $src"
+    throw "Missing file: $src"
   }
   $dest = Join-Path $HooksDest $hook
   $body = Get-Content -LiteralPath $src -Raw -Encoding UTF8

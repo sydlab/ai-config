@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 HOOKS_SRC="$SCRIPT_DIR/git-hooks/global"
 HOOKS_DEST="${HOME}/.githooks"
 HOOKS=(prepare-commit-msg commit-msg pre-push post-commit)
+SUPPORT=(commit_policy.py)
 
 if ! command -v python3 >/dev/null 2>&1; then
   echo "python3 is required by the commit-msg, prepare-commit-msg, and pre-push hooks." >&2
@@ -21,6 +22,14 @@ for hook in "${HOOKS[@]}"; do
   cp "$HOOKS_SRC/$hook" "$HOOKS_DEST/$hook"
   chmod +x "$HOOKS_DEST/$hook"
   echo "Hook  $HOOKS_DEST/$hook"
+done
+for file in "${SUPPORT[@]}"; do
+  if [[ ! -f "$HOOKS_SRC/$file" ]]; then
+    echo "Missing file: $HOOKS_SRC/$file" >&2
+    exit 1
+  fi
+  cp "$HOOKS_SRC/$file" "$HOOKS_DEST/$file"
+  echo "File  $HOOKS_DEST/$file"
 done
 
 current="$(git config --global core.hooksPath || true)"

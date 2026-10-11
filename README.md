@@ -90,10 +90,12 @@ Optional, enforces the commit message rules in `standards/git.md` in every repos
 
 This copies `scripts/git-hooks/global/` to `~/.githooks` and sets `git config --global core.hooksPath` to it:
 
-- **prepare-commit-msg** strips trailers and tool footers
+- **prepare-commit-msg** strips trailers and tool footers from the body, never the subject
 - **commit-msg** rejects trailers, banned words, subjects over 120 characters, and non-conventional subjects
-- **pre-push** re-checks every commit being pushed
+- **pre-push** re-checks every non-merge commit on every ref being pushed
 - **post-commit** runs the repository's own `.git/hooks/post-commit`, so the sync push above keeps working
+
+The rules live in `commit_policy.py`, which the installer copies alongside the hooks. Git-generated subjects (`Merge `, `Revert "`, `fixup!`, `squash!`, `amend!`) skip the length and format checks but not the trailer and banned-word checks.
 
 The hooks need `python3` on `PATH`. On Windows they run under Git Bash. Edit the files in `scripts/git-hooks/global/`, then re-run the script.
 
