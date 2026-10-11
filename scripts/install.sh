@@ -11,7 +11,6 @@ DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
 BUILT="$DOTFILES/build/00-personal-standards.mdc"
 CURSOR_RULES_DIR="${HOME}/.cursor/rules"
 MDC_PATH="${CURSOR_RULES_DIR}/00-personal-standards.mdc"
-OLD_WORKFLOW="${CURSOR_RULES_DIR}/10-git-workflow.mdc"
 SKILL_SRC="$DOTFILES/skills/git-workflow"
 SKILL_DEST="${HOME}/.agents/skills/git-workflow"
 
@@ -24,14 +23,6 @@ if [[ ! -f "$BUILT" ]]; then
 fi
 if [[ ! -d "$SKILL_SRC" ]]; then
   echo "Missing skill: $SKILL_SRC" >&2
-  exit 1
-fi
-
-if [[ -L "$OLD_WORKFLOW" || -f "$OLD_WORKFLOW" ]]; then
-  rm -f "$OLD_WORKFLOW"
-  echo "Removed $OLD_WORKFLOW"
-elif [[ -e "$OLD_WORKFLOW" ]]; then
-  echo "Refusing to replace $OLD_WORKFLOW because it is not a file or symlink." >&2
   exit 1
 fi
 
