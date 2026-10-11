@@ -2,18 +2,18 @@
 # Build build/00-personal-standards.mdc from standards/*.md. Do not hand-edit the built file.
 set -euo pipefail
 
-DOTFILES="$(cd "$(dirname "$0")/.." && pwd)"
-STANDARDS="$DOTFILES/standards"
-OUT_DIR="$DOTFILES/build"
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+STANDARDS="$REPO_ROOT/standards"
+OUT_DIR="$REPO_ROOT/build"
 OUT="$OUT_DIR/00-personal-standards.mdc"
 
 ORDER=(
   security.md
+  decision-authority.md
   git.md
   code.md
   environment.md
   behavior.md
-  decision-authority.md
 )
 
 for name in "${ORDER[@]}"; do
