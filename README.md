@@ -7,7 +7,6 @@ Git storage for personal global agent standards. Edit the source files, then ins
 ```
 standards/*.md                         # always-on personal standards
 skills/git-workflow/SKILL.md           # commit, PR, and cleanup steps
-rules/machines/*.local.md              # this machine only, not committed
 ```
 
 `standards/` is the source for the Cursor rule. `skills/git-workflow/` is the source for the skill. Do not hand-edit `build/`.
@@ -83,7 +82,7 @@ Pull skips if you have uncommitted changes or unpushed local commits. After a su
 
 The skill symlink reads `SKILL.md` directly. The Cursor rule is the built file, so a standards edit is not live until install or sync-pull rebuilds it.
 
-Cursor account User Rules are not written by install. Do not keep a second copy of `standards/` or the git skill there. Editor-only preferences, such as citation format, can stay in account rules.
+Cursor account User Rules are not written by install. Do not keep a second copy of `standards/` or the git skill there. Editor-only preferences, such as citation format, and the per-machine note (OS, shell, paths) stay in account rules.
 
 ## Local folder name
 
@@ -91,4 +90,4 @@ GitHub remote is `sydlab/ai-config`. If this clone is still named `cursor-dotfil
 
 ## Not tracked
 
-`build/`, cli-config, chat history, plugins, per-project rules, `rules/machines/*.local.md`
+`build/`, cli-config, chat history, plugins, per-project rules
