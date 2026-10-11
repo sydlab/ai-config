@@ -1,6 +1,16 @@
 # ai-config
 
-Git storage for personal global agent standards. Edit the source files, then install so your home directory points at them.
+Git storage for personal global agent standards. Clone [github.com/sydlab/ai-config](https://github.com/sydlab/ai-config) to `~/tech/repos/ai-config`, edit the source files, then install so your home directory points at them.
+
+## First-time setup (Mac)
+
+```bash
+cd ~/tech/repos/ai-config
+./scripts/install.sh
+./scripts/install-git-hooks.sh   # optional; enforces commit messages in every repo
+```
+
+After `git pull` here, run `./scripts/install.sh` again when the pull changed anything under `standards/`.
 
 ## How this fits together
 
@@ -58,7 +68,7 @@ Hook behavior (details not repeated in `standards/git.md`):
 - Git-generated subjects (`Merge `, `Revert "`, `fixup!`, `squash!`, `amend!`) skip length/format checks; trailers and banned words still fail.
 - Trailer lines must look like real trailers (e.g. `Closes #3`, `Signed-off-by:`), not plain sentences starting with "Fixes".
 
-A global `core.hooksPath` makes git skip each repository's own `.git/hooks`. The hooks need `python3` on `PATH`. Edit the files in `scripts/git-hooks/global/`, then re-run the script.
+A global `core.hooksPath` makes git skip each repository's own `.git/hooks` (project hooks such as Husky under `.git/hooks` will not run unless you add them under `~/.githooks` too). The hooks need `python3` on `PATH`. Edit the files in `scripts/git-hooks/global/`, then re-run the script.
 
 ## After you change a standard
 

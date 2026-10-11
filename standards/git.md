@@ -23,9 +23,9 @@ Use Conventional Commits, subject-only:
 type(scope): short imperative summary
 ```
 
-- Entire commit message <= 120 characters; no body
+- Entire commit message <= 120 characters; write subject-only (global hooks may allow a body but still enforce the subject line)
 - No trailers, no Co-authored-by, no tool attribution, no `--trailer`
-- Do not use the words `cursor`, `composer`, `claude`, or `copilot` (any casing)
+- Do not use the words `cursor`, `composer`, `claude`, or `copilot` anywhere in the message (any casing; includes innocent uses such as “database cursor”)
 - Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `ci`, `build`, `perf`, `style`, `revert`
 
 When committing, opening a PR, or cleaning up after merge, follow the **git-workflow** skill.

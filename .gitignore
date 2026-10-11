@@ -3,7 +3,6 @@ build/
 
 # OS / editor
 .DS_Store
-Thumbs.db
 *.swp
 
 *.log

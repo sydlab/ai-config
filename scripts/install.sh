@@ -4,14 +4,14 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-"$SCRIPT_DIR/build-agents.sh"
+"$SCRIPT_DIR/build-standards.sh"
 
-BUILT="$DOTFILES/build/00-personal-standards.mdc"
+BUILT="$REPO_ROOT/build/00-personal-standards.mdc"
 CURSOR_RULES_DIR="${HOME}/.cursor/rules"
 MDC_PATH="${CURSOR_RULES_DIR}/00-personal-standards.mdc"
-SKILL_SRC="$DOTFILES/skills/git-workflow"
+SKILL_SRC="$REPO_ROOT/skills/git-workflow"
 SKILL_DEST="${HOME}/.agents/skills/git-workflow"
 
 mkdir -p "$CURSOR_RULES_DIR"
