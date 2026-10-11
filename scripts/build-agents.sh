@@ -12,7 +12,6 @@ ORDER=(
   git.md
   code.md
   environment.md
-  editors.md
   behavior.md
   decision-authority.md
 )
