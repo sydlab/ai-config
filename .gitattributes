@@ -1,3 +1,2 @@
-scripts/git-hooks/post-commit text eol=lf
 scripts/git-hooks/global/* text eol=lf
 *.sh text eol=lf

@@ -1,9 +1,9 @@
 # Environment
 
-- Default work root: `~/Tech/repos` - clone into `~/Tech/repos/<repo-name>` unless given another path
+- Default work root: `~/tech/repos` - clone into `~/tech/repos/<repo-name>` unless given another path
 - Derive `<repo-name>` from the repository URL
-- Create `~/Tech/repos` if missing; if the target already exists as a git repo, use it; do not reclone
+- Create `~/tech/repos` if missing; if the target already exists as a git repo, use it; do not reclone
 - Explicit path or an already-open workspace wins - work in place
 - Do not invent a parallel status tracker; GitHub Projects is the system of record when status matters
 - Ask before creating or forking repositories
-- Config repo: `~/Tech/repos/ai-config`
+- Config repo: `~/tech/repos/ai-config`

@@ -13,7 +13,7 @@ Procedures for commit, PR, and post-merge cleanup. Use when the user asked to co
 2. Draft the message per the Git commit message rules
 3. Do not stage files that violate Security rules
 4. Add, commit, then verify with `git status`
-5. Pass commit messages via HEREDOC (or PowerShell here-string) for correct formatting
+5. Pass commit messages via HEREDOC for correct formatting
 
 ## After merge
 
