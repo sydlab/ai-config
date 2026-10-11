@@ -2,6 +2,16 @@
 
 Git storage for personal global agent standards. Edit the source files, then install so your home directory points at them.
 
+## How this fits together
+
+Three layers, on purpose:
+
+- **`standards/` → always-on rule** — small non-negotiables (security, paths, git safety, how to draft commits). Loaded every chat; keep it lean.
+- **`skills/`** — procedures when relevant (commit, PR, merge cleanup). Not loaded on every message.
+- **Global git hooks** — enforce message policy in git itself. No model tokens; rejects bad commits at commit/push time.
+
+Do not duplicate the same text in Cursor account User Rules. One source here, then install.
+
 ## What you edit
 
 ```
@@ -40,7 +50,13 @@ This copies `scripts/git-hooks/global/` to `~/.githooks` and sets `git config --
 - **commit-msg** rejects trailers, banned words, subjects over 120 characters, and non-conventional subjects
 - **pre-push** re-checks every non-merge commit on every ref being pushed
 
-The rules live in `commit_policy.py`, which the installer copies alongside the hooks. Git-generated subjects (`Merge `, `Revert "`, `fixup!`, `squash!`, `amend!`) skip the length and format checks but not the trailer and banned-word checks.
+The rules live in `commit_policy.py`, which the installer copies alongside the hooks.
+
+Hook behavior (details not repeated in `standards/git.md`):
+
+- Subject length and conventional format are enforced on the **subject line**; a body is allowed but you should still write subject-only per the standard.
+- Git-generated subjects (`Merge `, `Revert "`, `fixup!`, `squash!`, `amend!`) skip length/format checks; trailers and banned words still fail.
+- Trailer lines must look like real trailers (e.g. `Closes #3`, `Signed-off-by:`), not plain sentences starting with "Fixes".
 
 A global `core.hooksPath` makes git skip each repository's own `.git/hooks`. The hooks need `python3` on `PATH`. Edit the files in `scripts/git-hooks/global/`, then re-run the script.
 
@@ -52,7 +68,7 @@ A global `core.hooksPath` makes git skip each repository's own `.git/hooks`. The
 
 The skill symlink reads `SKILL.md` directly. The Cursor rule is the built file, so a standards edit is not live until install rebuilds it.
 
-Cursor account User Rules are not written by install. Do not keep a second copy of `standards/` or the git skill there. Editor-only preferences, such as citation format, can stay in account rules.
+Cursor account User Rules are not written by install. Remove duplicate git, PR, code, or behavior rules from account settings if they mirror this repo. Keep only tiny editor-only preferences (e.g. citation format) that are not in `standards/`.
 
 ## Not tracked
 

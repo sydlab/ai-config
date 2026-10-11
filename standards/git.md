@@ -17,16 +17,15 @@ Whether to commit or push is decided by Decision authority. This section is hard
 
 ## Commit message (always)
 
-Use Conventional Commits:
+Use Conventional Commits, subject-only:
 
 ```
 type(scope): short imperative summary
 ```
 
-- Entire commit message <= 120 characters. Subject only; no body
+- Entire commit message <= 120 characters; no body
 - No trailers, no Co-authored-by, no tool attribution, no `--trailer`
 - Do not use the words `cursor`, `composer`, `claude`, or `copilot` (any casing)
 - Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `ci`, `build`, `perf`, `style`, `revert`
-- The optional global hooks enforce subject length (<= 120) and format only. They allow a body and git-generated subjects (`Merge `, `Revert "`, `fixup!`, `squash!`, `amend!`); the subject-only rule above still applies when you write a message
 
-When actually committing, opening a PR, or cleaning up after merge, follow the **git-workflow** skill.
+When committing, opening a PR, or cleaning up after merge, follow the **git-workflow** skill.
